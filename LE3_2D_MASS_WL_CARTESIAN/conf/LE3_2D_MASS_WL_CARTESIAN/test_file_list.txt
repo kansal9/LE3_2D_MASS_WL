@@ -1,0 +1,8 @@
+Cparam_test.xml
+Cparam_test2.xml
+clusterParam.xml
+P2Sph.xml
+data/lensmcCat.fits
+data/convMap_test.fits
+data/shearMap_test.fits
+Cparam_Inp_test.xml
