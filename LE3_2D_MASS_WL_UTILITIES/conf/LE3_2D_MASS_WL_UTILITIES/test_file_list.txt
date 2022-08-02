@@ -1,0 +1,15 @@
+SampleInXML.xml
+data/lensmcCat.fits
+KSBCatalog.xml
+data/Fake_LE2_Cat.fits
+RegaussCatalog.xml
+MomentsMLCatalog.xml
+InputLE2Catalog.xml
+ClusterCatalog.xml
+data/Cluster_Catalog.fits
+data/mask_combined_256.fits
+vMask.xml
+data/Gamma_NSide16_Sphere.fits
+filenames.json
+data/testFile.fits
+data/PeakCatalog.fits
