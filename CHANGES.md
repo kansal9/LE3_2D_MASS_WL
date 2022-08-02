@@ -1,7 +1,33 @@
 # Change log
 
 
-## 2.5
+## 2.6
+
+### New features
+* 
+
+### Unknown Bugs
+* MRLens Filtering (error between python code and C++ code)
+
+### Expected changes for next release version
+* 
+
+### Missing features which will probably be added in next release version
+* Use of OU-PHZ inputs (need to coordinate with OU-PHZ people)
+* Use mask to estimate number of galaxies per pixel and verify requirements
+
+### Expected validation for next release version
+* Validation of Peak Catalogue using full sky Convergence Map
+* Validation of reduced shear in Cartesian pipeline
+* Validation of MRLens Filtering
+* Validation of Monte Carlo maps in Cartesian and Spherical pipeline
+* Validation of Shear peak catalogue
+
+### Dependency changes
+
+
+
+## 2.5.0
 
 
 ### Work with System Team
@@ -9,37 +35,29 @@
 
 
 ### New features
-* Extension of the Cartesian convergence to Full sky (Validation needed)
+* Extension of the Cartesian convergence to Full sky
 * Peak Catalogue built from the full sky convergence map
 * MRLens Filtering added
 * Input Visibility Mask (from VMPZ_ID) added (read and adapt resolution based on input data)
-* New branch Patches2Sphere => contains features related to Merging patches to healpix map (not completed yet)
+* New features Patches2Sphere (Merging patches to healpix map)
 * Use of SDC-FR to test the code.
 
 ### Unknown Bugs
 * MRLens Filtering (error between python code and C++ code)
-* Spherical Inpainting (not explained oscillations in the 2PCF)
 
 ### Maturity Level
 * According to current Matrices ~ ML3A
-
-
-### Expected changes for next release version
-* Merge the convergence maps into an Healpix map
 
 ### Missing features which will probably not be added in next release version
 * Use of OU-PHZ inputs (need to coordinate with OU-PHZ people)
 * Use mask to estimate number of galaxies per pixel and verify requirements
 
-### Expected validation for next release version
-* Validation of Peak Catalogue using full sky Convergence Map
-
-### Expected validation which will probably not be done in next release version
+### Expected validation which will probably be done in next release version
 * Validation of reduced shear in Cartesian pipeline
 * Validation of MRLens Filtering
 * Validation of Monte Carlo maps in Cartesian and Spherical pipeline
-* Validation of Spherical Inpainting
 * Validation of Shear peak catalogue
+* Validation of Peak Catalogue using full sky Convergence Map
 
 ### Dependency changes
 * Update to Elements 5.12.0
@@ -48,10 +66,13 @@
 * Update to DataModelTools 8.0.5
 * Updated to EL_FitsIO 3.1.0
 
-
 ### Added Dependency
 * DataSync
 
+### Some tests and modifications needed
+* File added at LE3_2D_MASS_WL_UTILITIES/auxdir/*.cpp for PeakCountShear program that needs
+  to be changed after next version of EL_FitsIO (Please delete file from auxdir after the changes made)
+* Search for TODO inside the project for more things that needs to be done.
 
 
 ## 2.4.0

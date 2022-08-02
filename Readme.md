@@ -4,7 +4,7 @@ LE3-2DMassMapping
 - Processing function name : 2D-MASS-WL
 - Projectname : LE3_2D_MASS_WL_KS
 - Profile     : prototype
-- Version     : 2.5
+- Version     : 2.6
 
 # Goal
 The processing function (PF) 2D-MASS-WL computes from the shear catalogue:
@@ -416,12 +416,12 @@ NAME
     
 SYNOPSIS 
 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CatalogSplitter
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CatalogSplitter
 
 The options available (listed via the --help) are:
 	  --workdir=<path>          name of the working directory 
 	  --inputCatalog=<name>          input Catalog in fits/xml format
-  	  --paramFile=<path_and_name_of_parameter_file>          Input Parameter File to split input catalog
+  	  --paramFile=<name>          Input Parameter File to split input catalog
   	  --Sub_Catalogs=<name>          jason/txt file name to store Sub-Catalog Names
 
 ```
@@ -430,7 +430,7 @@ The options available (listed via the --help) are:
 **_Split the catalogue into subcatalogues :_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CatalogSplitter --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CatalogSplitter --workdir=/run/media/user/Backup_Drive/WL_Results
 --paramFile=ParamConvergencePatch.xml --inputCatalog=euc-test-le3-wl-InputLE2Catalog.xml
 ```
 
@@ -445,13 +445,13 @@ NAME
 	LE3_2D_MASS_WL_CartesianMapMaker
     
 SYNOPSIS
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CartesianMapMaker
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMapMaker
 
 The options available (listed via the --help) are:
 	  --workdir=<path> 					                	name of the working directory 
 	  --input_ShearCatalog=<name>				            input shear Catalog in fits/xml format
       --input_ClusterCatalog=<name>                         input cluster Catalog in fits/xml
-	  --paramFile=<path_and_name_of_parameter_file>       	Input Parameter File in XML
+	  --paramFile=<name>							       	Input Parameter File in XML
 	  --outShearMap=<name>   				                output shear Map in fits format
       --outShearMapList=<name>                              List of output shear Maps in text/json format
 
@@ -462,14 +462,14 @@ The options available (listed via the --help) are:
 **_Build the shear maps from the shear catalogue:_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CartesianMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
 --paramFile=ParamConvergencePatch.xml --input_ShearCatalog=euc-test-le3-wl-InputLE2Catalog.xml
 ```
 
 **_Build the shear maps from the shear catalogue & cluster catalogue:_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CartesianMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
 --paramFile=ParamConvergenceCluster.xml --input_ShearCatalog=euc-test-le3-wl-InputLE2Catalog.xml --input_ClusterCatalog=euc-test-le3-wl-twodmass-ClusterCatalog.xml
 ```
 
@@ -491,15 +491,16 @@ NAME
 	LE3_2D_MASS_WL_CartesianMassMapping
     
 SYNOPSIS 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CartesianMassMapping
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMassMapping
 
 The options available (listed via the --help) are:
 	  --workdir=<path> 						                name of the working directory 
 	  --inputShearMap=<name>				            	input Shear Map in fits/json file format
       --inputConvMap=<name>                                 input convergence Map in fits format
-	  --paramFile=<path_and_name_of_parameter_file>       	Input Parameter File in XML
+	  --paramFile=<name>							       	Input Parameter File in XML
       --outConvMap=<name>                                   output convergence Map in fits format
 	  --outConvMapXML=<name>   		     	                output convergence Map in xml format
+      --outConvMaps=<name>                                  output list of convergence Maps in json format
       --outShearMap=<name>                                  output shear Map in fits format
 
 ```
@@ -509,11 +510,124 @@ The options available (listed via the --help) are:
 ```
 Example:
 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CartesianMassMapping --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMassMapping --workdir=/run/media/user/Backup_Drive/WL_Results
 --inputShearMap=ShearMap.fits --paramFile=ParamConvergencePatch.xml
 
 ```
 
+**IV) LE3_2D_MASS_WL_CartesianMCMaps**
+
+The LE3_2D_MASS_WL_CartesianMCMaps performs the produce N Monte Carlo realizations of Convergence maps. The input parameters(optional for KS+):
+-	Number of samples (NResamples) for Monte Carlo realizations
+-	Number of inpainting iterations 
+-	A Boolean to set B-mode constraint 
+-	A Boolean to force the power spectrum constraint to enforce the variance inside the gaps to be equal to the variance outside the gaps at different scales 
+-	Number of scales used by the power spectrum constraint 
+-	A Boolean to add borders to the map to deal with border effects 
+
+
+```
+
+NAME
+	LE3_2D_MASS_WL_CartesianMCMaps
+    
+SYNOPSIS 
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMCMaps
+
+The options available (listed via the --help) are:
+	  --workdir=<path> 						                        name of the working directory 
+      --inputShearCatalog=<name>              						input shear Catalog
+      --PatchparameterFile=<name>              						Input Parameter File
+      --MCConvergenceMaps=<name>              						MC convergence Maps Name in txt/jason file
+      --MCConvergenceMapsXML=<name> (=outMCConvMapXML.xml)			MC convergence Maps Name in XML file
+
+```
+**Running the code**
+
+**_Direct Kaiser and Squires, Inverse Kaiser and Squires or Direct Kaiser and Squires including inpainting (based on input parameters in Parameter file) :_**
+```
+Example:
+
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CartesianMCMaps --workdir=/run/media/user/Backup_Drive/WL_Results
+--inputShearCatalog=euc-test-le3-wl-InputLE2Catalog.xml --paramFile=ParamConvergencePatch.xml
+
+```
+
+**V) LE3_2D_MASS_WL_Filtering**
+
+The LE3_2D_MASS_WL_Filtering performs the MR Filter on the Convergence maps. The input parameters:
+-	FDR (False discovery rate) threshold
+
+
+```
+
+NAME
+	LE3_2D_MASS_WL_Filtering
+    
+SYNOPSIS 
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_Filtering
+
+The options available (listed via the --help) are:
+	  --workdir=<path> 						    name of the working directory 
+      --inmap=<name>                           input map
+      --paramFile=<name>                       Input Parameter File in XML
+      --positiveCons arg (=0)               Positive constraint (0-> False and 1->True)
+      --KillLastScale arg (=0)              Kill last scale during the filtering (0-> False and 1-> True)
+      --KillIsol arg (=0)                   suppress isolated pixels (0-> False and 1-> True)
+      --FirstScale arg (=0)                 FirstScale used for detection
+      --nbIter arg (=10)                    number of loops in reconstruction iterative process
+      --outputMap arg                       Output Map in fits format
+
+
+```
+**Running the code**
+
+**_Perform MR Filter (based on input FDR Threshold parameters in Parameter file) :_**
+```
+Example:
+
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_Filtering --workdir=/run/media/user/Backup_Drive/WL_Results
+--inMap=ConvergenceMap.fits --paramFile=ParamConvergencePatch.xml --positiveCons=1 --KillLastScale=1 --FirstScale=2 
+
+```
+
+**VI) LE3_2D_MASS_WL_PatchesToSphere**
+
+The LE3_2D_MASS_WL_PatchesToSphere performs the merging of Convergence patches to the spherical Convergence map (in Healpix format). The input parameters:
+-	Healpix Pixel Size
+-	Fraction of patch overlap
+
+```
+
+NAME
+	LE3_2D_MASS_WL_PatchesToSphere
+    
+SYNOPSIS 
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PatchesToSphere
+
+The options available (listed via the --help) are:
+	  --workdir=<path> 						                        name of the working directory 
+      --inputShearMapList=<name>              						input Shear Maps list in json file format
+      --paramFile=<name>              								Input Parameter File
+      --outputPatchesCenters=<name>          output file containing the position of the centre of the patches used to compute the projections in fits format.
+      --outputPatchesCentersXML=<name>       output file containing the position of the centre of the patches used to compute the projections in xml format.
+      --outputHealpixConvergences=<name>     Output list of Spherical convergence Maps(Noisy, Denoised and SNR) in json format.
+      --outputHealpixConvergence=<name>      Output convergence map E & B mode in BinTable (healpix) Format.
+      --outputHealpixConvergenceXML=<name>   Output XML product for patches to sphere convergence map.
+      --GalCountMap=<name>                   output Galaxy count Map which conatins number of Galaxies per pixel for each redshift bin in fits format
+      --GalCountMapXML=<name>                output Galaxy count Map which conatins number of Galaxies per pixel for each redshift bin in XML format
+
+```
+**Running the code**
+
+**_Merging of Cartesian Patches of convergence maps to the Spherical convergence map (based on input parameters in Parameter file) :_**
+```
+Example:
+
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PatchesToSphere --workdir=/run/media/user/Backup_Drive/WL_Results
+--inputShearMapList=ShearMapList.json --paramFile=ParamConvergencePatchesToSphere.xml
+
+```
 
 ### Spherical Mass Mapping Module
 
@@ -531,7 +645,7 @@ NAME
     
 SYNOPSIS 
 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CatalogSplitter
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CatalogSplitter
 
 The options available (listed via the --help) are:
 	  --workdir=<path> 						              name of the working directory 
@@ -545,7 +659,7 @@ The options available (listed via the --help) are:
 **_Split the catalogue into subcatalogues :_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_CatalogSplitter --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_CatalogSplitter --workdir=/run/media/user/Backup_Drive/WL_Results
 --paramFile=ParamsConvergenceSphere.xml --inputCatalog=euc-test-le3-wl-InputLE2Catalog.xml
 ```
 
@@ -560,7 +674,7 @@ NAME
 	LE3_2D_MASS_WL_SphericalMapMaker
     
 SYNOPSIS
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_SphericalMapMaker
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMapMaker
 
 The options available (listed via the --help) are:
 	  --workdir=<path> 					                	            name of the working directory 
@@ -576,7 +690,7 @@ The options available (listed via the --help) are:
 **_Build the shear maps from the shear catalogue:_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_SphericalMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMapMaker --workdir=/run/media/user/Backup_Drive/WL_Results
 --sphericalParameterFile=ParamConvergenceSphere.xml --inputShearCatalog=euc-test-le3-wl-InputLE2Catalog.xml
 ```
 
@@ -597,12 +711,13 @@ NAME
 	LE3_2D_MASS_WL_SphericalMassMapping
     
 SYNOPSIS 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_SphericalMassMapping
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMassMapping
 
 The options available (listed via the --help) are:
 	  --workdir=<path> 				                      	name of the working directory 
 	  --inGamma=<name>			                    	    input E/B mode Shear Map in fits(BinTable) format
 	  --inKappa=<name>				                        input E/B mode Convergence Map in fits(BinTable) format
+      --inGalCount=<name>       			                Galaxy count Map
 	  --paramFile=<path_and_name_of_parameter_file>         Input Parameter File in XML
 	  --outputKappa=<name>   				                Output convergence map E & B mode in BinTable Format
 	  --outputShear=<name>   			            	    Output shear map E & B mode in BinTable Format
@@ -615,12 +730,51 @@ The options available (listed via the --help) are:
 ```
 Example:
 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_SphericalMassMapping --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMassMapping --workdir=/run/media/user/Backup_Drive/WL_Results
 --inGamma=ShearMap.fits --paramFile=ParamConvergenceSphere.xml
 
 ```
 
-### Spherical Mass Mapping Module
+
+**IV) LE3_2D_MASS_WL_SphericalMCMaps**
+
+The LE3_2D_MASS_WL_SphericalMCMaps performs the produce N Monte Carlo realizations of Convergence maps. The input parameters(optional for KS+):
+- 	Number of samples (NResamples) for Monte Carlo realizations
+-	Number of inpainting iterations 
+-	A Boolean to set B-mode constraint 
+-	A Boolean to force the power spectrum constraint to enforce the variance inside the gaps to be equal to the variance outside the gaps at different scales 
+-	Number of scales used by the power spectrum constraint 
+-	A Boolean to add borders to the map to deal with border effects 
+
+```
+
+NAME
+	LE3_2D_MASS_WL_SphericalMCMaps
+    
+SYNOPSIS 
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMCMaps
+
+The options available (listed via the --help) are:
+	  --workdir=<path> 				                      	name of the working directory 
+      --inCatalogFile=<name>                			   input Catalog in fits/xml format
+      --sphericalParameterFile=<name>     			     second Input Parameter File
+      --MCConvergenceMaps=<name>                          MC convergence Maps Name in txt/jason file
+      --outputMCKappaXML=<name>(=outputKappaXML.xml)        Output XML product for Spherical MC convergence map
+
+```
+**Running the code**
+
+**_Direct Kaiser and Squires, Inverse Kaiser and Squires or Direct Kaiser and Squires including inpainting (based on input parameters in Parameter file) :_**
+```
+Example:
+
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_SphericalMCMaps --workdir=/run/media/user/Backup_Drive/WL_Results
+--inCatalogFile=euc-test-le3-wl-InputLE2Catalog.xml --sphericalParameterFile=ParamConvergenceSphere.xml
+
+```
+
+
+### Peak Count Module
 
 **I) PeakCount**
 
@@ -638,7 +792,7 @@ NAME
 	LE3_2D_MASS_WL_PeakCountConvergence -- Build the peak catalogue from a convergence map
     
 SYNOPSIS 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountConvergence
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountConvergence
 
  The options available (listed via the --help) are:
    	  --workdir=<path> 				                            	name of the working directory 
@@ -653,7 +807,7 @@ E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountConvergence
 **_Peak Catalog estimated from a convergence map :_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountConvergence --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountConvergence --workdir=/run/media/user/Backup_Drive/WL_Results
 --inputConvMap=convergenceMap.fits --paramPeakConvergence=ParamsPeakCountConvergence.xml
 
 ```
@@ -665,7 +819,7 @@ NAME
 	LE3_2D_MASS_WL_PeakCountSphere -- Build the peak catalogue from full sky convergence map
     
 SYNOPSIS 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountSphere
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountSphere
 
  The options available (listed via the --help) are:
    	  --workdir=<path> 				                            	name of the working directory 
@@ -680,7 +834,7 @@ E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountSphere
 **_Peak Catalog estimated from full sky convergence map :_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountSphere --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountSphere --workdir=/run/media/user/Backup_Drive/WL_Results
 --inputConvMap=FullSkyConvergenceMap.fits --paramPeakConvergence=ParamsPeakCountConvergence.xml
 
 ```
@@ -692,7 +846,7 @@ NAME
 	LE3_2D_MASS_WL_PeakCountShear -- Build the peak catalogue from a Shear Catalog
     
 SYNOPSIS 
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountShear
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountShear
 
  The options available (listed via the --help) are:
  	 --workdir=<path> 				                            	name of the working directory 
@@ -708,7 +862,7 @@ E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountShear
 **_Peak Catalog estimated from a Shear catalog :_**
 ```
 Example:
-E-Run LE3_2D_MASS_WL_KS 2.5 LE3_2D_MASS_WL_PeakCountShear --workdir=/run/media/user/Backup_Drive/WL_Results
+E-Run LE3_2D_MASS_WL_KS 2.6 LE3_2D_MASS_WL_PeakCountShear --workdir=/run/media/user/Backup_Drive/WL_Results
 --inputShearCatalog=euc-test-le3-wl-InputLE2Catalog.xml --paramPatchMap=ParamConvergencePatch.xml
 --paramPeakMassAperture=ParamsPeakCountMassAperture.xml
 
