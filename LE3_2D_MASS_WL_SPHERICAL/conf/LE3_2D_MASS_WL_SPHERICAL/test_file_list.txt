@@ -1,3 +1,0 @@
-Sparam_test.xml
-data/Gamma_32_mask.fits
-data/Gamma_NSide16_Sphere.fits
