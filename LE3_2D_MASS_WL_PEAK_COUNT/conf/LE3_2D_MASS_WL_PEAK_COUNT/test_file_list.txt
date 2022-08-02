@@ -1,0 +1,7 @@
+Cparam_test.xml
+Cparam_test3.xml
+PMassAp_test.xml
+PConvparam_test.xml
+data/lensmcCat.fits
+data/convMap_test.fits
+data/SphereKE.fits
