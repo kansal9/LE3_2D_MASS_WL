@@ -32,11 +32,12 @@ struct CartesianProcessorFixture
 {
     DataSync sync;
     path testParamConvergencePatch, testCatFile;
-    std::map<std::string, std::string> args;
+    std::map<std::string, std::string> args_string;
+    std::map<std::string, variable_value> args_values;
     CartesianProcessorFixture() :
             sync("LE3_2D_MASS_WL_CARTESIAN/datasync_webdav.conf",
                  "LE3_2D_MASS_WL_CARTESIAN/test_file_list.txt"),
-            testParamConvergencePatch(sync.absolutePath("Cparam_test.xml")),
+            testParamConvergencePatch(sync.absolutePath("Cparam_test_1patch.xml")),
             testCatFile(sync.absolutePath("InputLE2Catalog.xml"))
     {
         sync.download();
@@ -49,28 +50,22 @@ BOOST_FIXTURE_TEST_SUITE (CartesianProcessor_test, CartesianProcessorFixture)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE( convergencePatchTest ) {
-
-    args["paramfile"] = testParamConvergencePatch.native();
-    args["workdir"] = testCatFile.parent_path().native();
-    args["shear"] = testCatFile.filename().native();
-
-    for(auto iter = args.begin(); iter != args.end(); ++iter)
-    {
-        std::cout << iter->first << ": " << iter->second << std::endl;
-    }
-
+BOOST_FIXTURE_TEST_CASE( cpConvergencePatchTest, CartesianProcessorFixture ) {
     try
     {
-        CartesianProcessor cp(args);
+        CartesianProcessor cp;
+        cp.setOption("paramfile", testParamConvergencePatch.native());
+        cp.setOption("workdir", testCatFile.parent_path().native());
+        cp.setOption("shear", testCatFile.filename().native());
+        cp.parseOptions();
         cp.process();
+        BOOST_CHECK(true);
     }
-    catch(ExitCode& exitCode)
+    catch(std::exception& e)
     {
-        int code = static_cast<int>(exitCode);
-        std::cout << "Exit code: " << code << std::endl;
+        std::cerr << e.what() << std::endl;
+        BOOST_THROW_EXCEPTION(e);
     }
-
 }
 
 //-----------------------------------------------------------------------------

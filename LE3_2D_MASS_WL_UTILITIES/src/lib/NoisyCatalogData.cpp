@@ -42,6 +42,7 @@ CatalogData NoisyCatalogData::getNoisyCatalog(const CatalogData& inputData)
         temp = pow(inputData["g1"](i), 2) + pow(inputData["g2"](i), 2);
         radius = sqrt(temp);
         theta = M_PI * ((double) rand() / RAND_MAX);
+        // just change the ellipticities
         output["g1"](i) = radius * cos(2 * theta);
         output["g2"](i) = radius * sin(2 * theta);
     }

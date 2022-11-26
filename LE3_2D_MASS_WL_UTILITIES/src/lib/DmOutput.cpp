@@ -33,6 +33,11 @@ static Elements::Logging logger = Elements::Logging::getLogger("DmOutput");
 namespace LE3_2D_MASS_WL_UTILITIES
 {
 
+using DataContainer_type = sys::dss::dataContainer;
+using NoisyConvergence_type = twoDMassCollectConvergencePatch::NoisyConvergence_type;
+using DenoisedConvergence_type = twoDMassCollectConvergencePatch::DenoisedConvergence_type;
+using SNRPatch_type = twoDMassCollectConvergencePatch::SNRPatch_type;
+
 sys::genericHeader* getGenericHeader(const std::string& productType)
 {
     GenericHeaderGenerator generator("LE3Product");
@@ -56,52 +61,43 @@ dataContainer DmOutput::createDataContainer(const fs::path& fits_out_filename)
     return output;
 }
 
-// output 1
-void DmOutput::createNoisedPatchXml(
+void DmOutput::createPatchXml(
         std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
+        outputType datatype,
         const fs::path& fits_out_filename)
 {
-    auto output = createDataContainer(fits_out_filename);
-    twoDMassConvergencePatch NoisyMap(output,
-            "le3.wl.2dmass.output.patchconvergence");
-    product->Data().NoisyConvergence(
-            twoDMassCollectConvergencePatch::NoisyConvergence_type
-            { NoisyMap });
-    auto& noisemaplist =
-            product->Data().NoisyConvergence().get().DataContainer();
-    noisemaplist.FileName(fits_out_filename.string());
-    logger.info() << "Added NoisyConvergence data container and file ";
-}
+    if(!fs::exists(fits_out_filename))
+    {
+        logger.debug() << "Not creating product for non-existant file " << fits_out_filename;
+        return;
+    }
 
-// output 2
-void DmOutput::createDenoisedPatchXml(
-        std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
-        const fs::path& fits_out_filename)
-{
     auto output = createDataContainer(fits_out_filename);
-    twoDMassConvergencePatch DenoisedMap(output,
-            "le3.wl.2dmass.output.patchconvergence");
-    product->Data().DenoisedConvergence(
-            twoDMassCollectConvergencePatch::DenoisedConvergence_type
-            { DenoisedMap });
-    auto& denoisedmaplist =
-            product->Data().DenoisedConvergence().get().DataContainer();
-    denoisedmaplist.FileName(fits_out_filename.string());
-    logger.info() << "Added DenoisedConvergence data container and file ";
-}
+    std::unique_ptr<DataContainer_type> maplist_ptr;
+    if(datatype == outputType::NoisedPatch)
+    {
+        twoDMassConvergencePatch map(output, "le3.wl.2dmass.output.patchconvergence");
+        product->Data().NoisyConvergence(NoisyConvergence_type{ map });
+        maplist_ptr = std::make_unique<DataContainer_type>(
+                product->Data().NoisyConvergence().get().DataContainer());
 
-// output 3
-void DmOutput::createSNRPatchOutputXml(
-        std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
-        const fs::path& fits_out_filename)
-{
-    auto output = createDataContainer(fits_out_filename);
-    twoDMassSNRPatch snrMap(output,"le3.wl.2dmass.output.patchconvergence");
-    product->Data().SNRPatch(twoDMassCollectConvergencePatch::SNRPatch_type
-            { snrMap });
-    auto& snrmaplist = product->Data().SNRPatch().get().DataContainer();
-    snrmaplist.FileName(fits_out_filename.string());
-    logger.info() << "Added SNR Convergence data container and file ";
+    }
+    else if(datatype == outputType::DenoisedPatch)
+    {
+        twoDMassConvergencePatch map(output, "le3.wl.2dmass.output.patchconvergence");
+        product->Data().DenoisedConvergence(DenoisedConvergence_type{ map });
+        maplist_ptr = std::make_unique<DataContainer_type>(
+                product->Data().DenoisedConvergence().get().DataContainer());
+    }
+    else if(datatype == outputType::SNRPatch)
+    {
+        twoDMassSNRPatch map(output, "le3.wl.2dmass.output.patchsnr");
+        product->Data().SNRPatch(SNRPatch_type{ map });
+        maplist_ptr = std::make_unique<DataContainer_type>(
+                product->Data().DenoisedConvergence().get().DataContainer());
+    }
+    maplist_ptr->FileName(fits_out_filename.filename().string());
+    logger.info() << "Added data container and file";
 }
 
 // output 4
@@ -265,7 +261,7 @@ void DmOutput::createPatchtoSphereGalCountXml(
 }
 
 // output 13
-void DmOutput::createPatchtoSphereProjCntrPosXml(
+void DmOutput::createPatchtoSphereProjCPosXml(
         std::unique_ptr<dpdTwoDMassConvergencePatchesToSphere> &product,
         const fs::path& fits_out_filename)
 {

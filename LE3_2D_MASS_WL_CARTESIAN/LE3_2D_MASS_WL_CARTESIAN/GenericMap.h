@@ -21,15 +21,15 @@
  *
  */
 
-#ifndef _LE3_2D_MASS_WL_CARTESIAN_GETMAP_H
-#define _LE3_2D_MASS_WL_CARTESIAN_GETMAP_H
-#include "LE3_2D_MASS_WL_CARTESIAN/CartesianParam.h"
-#include "LE3_2D_MASS_WL_UTILITIES/Matrix.h"
+#ifndef _LE3_2D_MASS_WL_CARTESIAN_GENERICMAP_H
+#define _LE3_2D_MASS_WL_CARTESIAN_GENERICMAP_H
 #include "LE3_2D_MASS_WL_CARTESIAN/MatrixProcess.h"
+#include "LE3_2D_MASS_WL_CARTESIAN/CartesianParam.h"
+#include "LE3_2D_MASS_WL_UTILITIES/PatchDef.h"
+#include "LE3_2D_MASS_WL_UTILITIES/Matrix.h"
 #include <fftw3.h>
 #include <utility>
 
-#include "../../LE3_2D_MASS_WL_UTILITIES/LE3_2D_MASS_WL_UTILITIES/PatchDef.h"
 
 using LE3_2D_MASS_WL_UTILITIES::Matrix;
 
@@ -355,7 +355,7 @@ protected:
      */
     double m_PixelSize;
 };
-// End of GetMap class
+// End of GenericMap class
 
 }// namespace LE3_2D_MASS_WL_CARTESIAN
 

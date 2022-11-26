@@ -119,5 +119,19 @@ BOOST_AUTO_TEST_CASE( fillTest_test )
     BOOST_CHECK(catFillTest.getNentries() == N);
 }
 
+BOOST_AUTO_TEST_CASE( minMaxTest_test )
+{
+    CatalogData catFillTest;
+    int N = 10;
+    catFillTest.fillTest(N, "LENSMC", 0, 10, 20, 30);
+    double raMin, raMax, decMin, decMax;
+    catFillTest.getMinMax("ra", raMin, raMax);
+    catFillTest.getMinMax("dec", decMin, decMax);
+    BOOST_CHECK(raMin == 0);
+    BOOST_CHECK(raMax == 10);
+    BOOST_CHECK(decMin == 20);
+    BOOST_CHECK(decMax == 30);
+}
+
 //-----------------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE_END ()

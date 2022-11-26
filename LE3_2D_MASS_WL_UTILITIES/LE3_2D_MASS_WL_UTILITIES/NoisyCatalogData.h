@@ -58,7 +58,7 @@ public:
      * @param[in]     <inputData> Catalog Data
      * @return        Catalog Data with noise included in it
      */
-    CatalogData getNoisyCatalog(const CatalogData& inputData);
+    static CatalogData getNoisyCatalog(const CatalogData& inputData);
 
 private:
 

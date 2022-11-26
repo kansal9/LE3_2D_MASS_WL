@@ -374,13 +374,16 @@ VecRaster<double, 3> GenericMap::createRaster()
     { m_sizeXaxis, m_sizeYaxis, m_sizeZaxis });
     for (int z = 0; z < m_sizeZaxis; ++z)
     {
+        double counts = 0;
         for (int y = 0; y < m_sizeYaxis; ++y)
         {
             for (int x = 0; x < m_sizeXaxis; ++x)
             {
                 raster[{ x, y, z }] = m_mapValues[z](x, y);
+                counts += raster[{ x, y, z }];
             }
         }
+        logger.info() << "Fill raster axis " << z << " with a sum of " << counts;
     }
     return raster;
 }
@@ -483,6 +486,8 @@ void GenericMap::writeImageHeader(const Hdu &hdu,
     float crval1 = (floor(m_sizeXaxis/2)+0.5)*cd11+patch.getRaMin()*180./M_PI;
     float crval2 = (floor(m_sizeYaxis/2)+0.5)*cd22+patch.getRaMax()*180./M_PI;
 
+    std::string dentype = (fabs(cartesianParam.getGaussStd()) > 0.001) ? "GAUSSIAN" : "NONE";
+
     std::list<Record<boost::any>> records =
     {
     { "WCSAXES", 2, "", "Number of axes in World Coordinate System" },
@@ -513,7 +518,7 @@ void GenericMap::writeImageHeader(const Hdu &hdu,
     { "PROJ", "TAN", "", "projection used" },
     { "PWIDTH", patch.getPatchWidth()*rad2deg, "deg", "PatchWidth" },
     { "PIXSIZE", patch.getPixelSize()*rad2deg, "deg", "Pixelsize" },
-    { "NITREDSH", cartesianParam.getRsNItReducedShear(), "",
+    { "NITREDSH", cartesianParam.getRsCorrection() ? REDUCESHEARNITER : 0, "",
             "Number of iterations for reduced shear" },
     { "STDREDSH", cartesianParam.getRsGaussStd(), "",
             "gaussian smoothing sigma for reduced shear" },
@@ -526,7 +531,7 @@ void GenericMap::writeImageHeader(const Hdu &hdu,
     { "FBMODE", cartesianParam.isForceBMode(), "",
             "True if B-mode forced to zero in the gaps" },
     { "ADDBORD", cartesianParam.isAddBorder(), "", "True if Borders added" },
-    { "DENTYPE", "GAUSSIAN", "", "denoising type" },
+    { "DENTYPE", dentype, "", "denoising type" },
     { "GAUSSSTD", cartesianParam.getGaussStd(), "",
             "Standard deviation of gaussian smoothing" },
     { "FDRVAL", cartesianParam.getThresholdFdr(), "",
@@ -535,37 +540,45 @@ void GenericMap::writeImageHeader(const Hdu &hdu,
     { "BAL_BINS", cartesianParam.isBalancedBins(), "",
             "True if balanced bins are applied" },
     { "NRESAMPL", cartesianParam.getNResamples(), "",
-            "number of resampling of input dictionary" },
-    // TODO: fix this!
-    //{ "ZMIN", patch.getZMin(), "", "Minimum Redshift" },
-    //{ "ZMAX", patch.getZMax(), "", "Maximum Redshift" }
+            "number of resampling of input dictionary" }
     };
 
     logger.info() << "Record created";
-
     hdu.header().writeSeq(records);
-
 }
 
 void GenericMap::writeMap(const std::string& filename,
                           CartesianParam &cartesianParam)
 {
-    MefFile f(filename, FileMode::Overwrite);
+    // Test if file already exists or not
+    bool exists = fs::exists(fs::path(filename));
+
+    // Open a file if it exists, create a new one otherwise
+    MefFile f(filename, FileMode::Write);
+
+    // Write primary header if file does not exist before
+    if(!exists)
+    {
+        logger.info() << "Writing records to primary HDU";
+        const auto &primary = f.primary();
+        writeImageHeader(primary, cartesianParam);
+    }
+    else
+    {
+        logger.info() << "File already exists, do not add primary HDU";
+    }
+
+    // Fill extension
     const auto raster = createRaster();
-    logger.info() << "writing records to primary HDU";
-    const auto &primary = f.primary();
-    writeImageHeader(primary, cartesianParam);
     logger.info() << "Assigning new Image HDU: " << cartesianParam.getExtName();
     const auto &ext = f.assignImageExt(cartesianParam.getExtName(), raster);
 
-    // Image HDU
-    //Adding extra keys to image header
-    auto& patch = cartesianParam.getPatches()[0];
+    // Adding extra keys to image header
+    auto& patch = cartesianParam.getPatches()[cartesianParam.m_currIpatch];
     std::list<Record<boost::any>> records =
     {
-    //TODO:fix this! (need param)
-    //{"ZMIN", patch.getZMin()},
-    //{"ZMAX", patch.getZMax()},
+    {"ZMIN", cartesianParam.getZMin(cartesianParam.m_currIzbin)},
+    {"ZMAX", cartesianParam.getZMax(cartesianParam.m_currIzbin)},
     {"RAMIN", patch.getRaMin() * rad2deg},
     {"RAMAX", patch.getRaMax() * rad2deg},
     {"DECMIN", patch.getDecMin() * rad2deg},

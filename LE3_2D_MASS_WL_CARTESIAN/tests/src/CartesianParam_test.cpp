@@ -93,10 +93,9 @@ BOOST_FIXTURE_TEST_CASE (clusterxmlFile_test, CartesianParamDataSyncFixture)
 BOOST_FIXTURE_TEST_CASE (patches2SpherexmlFile_test, CartesianParamDataSyncFixture)
 {
     std::cout << "-- CARTESIANPARAM: Patches2Sphere.xml file"<< std::endl;
-    double placeHolder = 0.;
-    CatalogData dummy;
-    carParam.readConvPatchesToSphereXMLFile(p2sphxmlFileName.native(),
-                placeHolder, placeHolder, placeHolder, placeHolder, dummy);
+    CatalogData dummy_cat;
+    dummy_cat.fillTest(1);
+    carParam.readConvPatchesToSphereXMLFile(p2sphxmlFileName.native(), dummy_cat);
     BOOST_CHECK_EQUAL(carParam.getNside(), 512);
 }
 
@@ -117,15 +116,16 @@ BOOST_FIXTURE_TEST_CASE(readParameterFileCluster_test, CartesianParamDataSyncFix
     fs::path workdir = clusterCatalogFilePath.parent_path();
     fs::path catalogFileName = clusterCatalogFilePath.filename();
     clusterCat.getCatalogData(workdir, catalogFileName);
-    readParameterFile(clusterxmlFileName, carParam, dummy, 0,0,0,0, clusterCat);
+    readParameterFile(clusterxmlFileName, carParam, dummy, clusterCat);
     BOOST_CHECK_EQUAL(carParam.getPatches()[0].getPatchWidth(), 10.*M_PI/180.);
 }
 //-----------------------------------------------------------------------------
 BOOST_FIXTURE_TEST_CASE(readParameterFilePatches2Sphere_test, CartesianParamDataSyncFixture)
 {
     std::cout << "-- CARTESIANPARAM: readParameterFilePatches2Sphere_test"<< std::endl;
-    CatalogData dummy;
-    readParameterFile(p2sphxmlFileName, carParam, dummy, 70., 90., 350., 360.);
+    CatalogData dummy_cat;
+    dummy_cat.fillTest(1);
+    readParameterFile(p2sphxmlFileName, carParam, dummy_cat);
     BOOST_CHECK_EQUAL(carParam.getNside(), 512);
 }
 //-----------------------------------------------------------------------------

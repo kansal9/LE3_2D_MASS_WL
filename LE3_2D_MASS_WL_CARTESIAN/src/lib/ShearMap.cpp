@@ -37,7 +37,7 @@ ShearMap::ShearMap(GenericMap const& copyMap, bool copyValues) :
 
 void ShearMap::getConvMap(ConvergenceMap& outputConvMap) const
 {
-    logger.info() << "Will perform getConvMap with sizes: " << m_sizeXaxis
+    logger.debug() << "Will perform getConvMap with sizes: " << m_sizeXaxis
             << " " << m_sizeYaxis;
 
     double fftFactor = 1.0 / m_sizeXaxis / m_sizeYaxis;
@@ -146,6 +146,7 @@ void ShearMap::correctReducedShear(
     {
         for (int j = 0; j < m_sizeYaxis; j++)
         {
+            // value of the current shear map
             g = std::complex<double>(getBinValue(i, j, 0),
                     getBinValue(i, j, 1));
             if (useKappaB)
@@ -158,6 +159,7 @@ void ShearMap::correctReducedShear(
                 kappa = std::complex<double>(inputConvMap.getBinValue(i, j, 0),
                         0);
             }
+            // perform the correction, self is now a better estimate of the shear
             gamma = g * (std::complex<double>(1., 0) - kappa);
             setBinValue(i, j, 0, std::real(gamma));
             setBinValue(i, j, 1, std::imag(g));

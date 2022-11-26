@@ -292,16 +292,16 @@ public:
     void setRsGaussStd(double rsGaussStd);
 
     /**
-     * @brief get rsnItReducedShear
-     * @return rsnItReducedShear
+     * @brief get rsCorrection
+     * @return rsCorrection
      */
-    unsigned int getRsNItReducedShear() const;
+    bool getRsCorrection() const;
 
     /**
-     * @brief set rsnItReducedShear
-     * @param rsnItReducedShear
+     * @brief set rsCorrection
+     * @param rsCorrection
      */
-    void setRsNItReducedShear(int rsnItReducedShear);
+    void setRsCorrection(bool rsCorrection);
 
     /**
      * @brief get rsThreshold
@@ -391,9 +391,9 @@ public:
 
 protected:
     /**
-     * number of iterations used to compute the reduced shear
+     * compute reduced shear (3 levels)
      */
-    unsigned int m_RSNItReducedShear;
+    bool m_RSCorrection;
 
     /**
      * threshold to perform hard-thresholding in the reduced shear
@@ -582,7 +582,7 @@ template<typename T>
 void GenericParam::readBaseParams(T data_xml)
 {
     // reduce shear parameters
-    setRsNItReducedShear(data_xml.ReducedShear().NItReducedShear());
+    setRsCorrection(data_xml.ReducedShear().NItReducedShear() > 0);
     setRsThreshold(data_xml.ReducedShear().RSThreshold());
     setRsGaussStd(data_xml.ReducedShear().GaussSTD());
 

@@ -159,6 +159,11 @@ public:
     void sortIndex(const std::string& key);
 
     /**
+     * @brief    get extremas for one given column
+     */
+    void getMinMax(const std::string& key, double& min, double& max) const;
+
+    /**
      * @brief    get colupn index for column proxy name
      */
     int getColumnIndex(std::string colname) const;

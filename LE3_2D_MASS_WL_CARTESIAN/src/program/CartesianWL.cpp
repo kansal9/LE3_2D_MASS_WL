@@ -42,7 +42,7 @@ public:
         auto add = desc.add_options();
         add("paramfile", value<std::string>()->required(), "Input parameters file");
         add("workdir", value<std::string>()->required(), "Working directory");
-        add("shear", value<std::string>(), "Input shear catalog/map");
+        add("shear", value<std::string>(), "Input shear catalog");
         add("clusterCatalog", value<std::string>(), "Input cluster catalog");
         add("mc", "Do produce Monte Carlo maps");
 
@@ -65,6 +65,7 @@ public:
         ////////////////////////////////////////////////////////////////////////
         // Run process
         ////////////////////////////////////////////////////////////////////////
+
         try
         {
             CartesianProcessor cp(args);

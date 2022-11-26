@@ -57,7 +57,7 @@ void SphericalIO::writePrimaryHeader(const Hdu &hdu)
     { "SOFTNAME", "LE3_2D_MASS_WL_KS", "",
              "Software used to create the product" },
     { "SOFTVERS", SWVersion, "", "Software version" },
-    { "NITREDSH", m_SphParam.getRsNItReducedShear(), "",
+    { "NITREDSH", m_SphParam.getRsCorrection() ? REDUCESHEARNITER : 0, "",
              "Number of iterations for reduced shear" },
     { "STDREDSH", m_SphParam.getRsGaussStd(), "",
              "gaussian smoothing sigma for reduced shear" },

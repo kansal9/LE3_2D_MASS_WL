@@ -48,7 +48,7 @@ void MatrixProcess::performDCT(double* input, double* output)
                 FFTW_ESTIMATE);
     }
 
-    logger.info() << "Will execute DCTplan with sizes: " << m_sizeXaxis << " "
+    logger.debug() << "Will execute DCTplan with sizes: " << m_sizeXaxis << " "
             << m_sizeYaxis;
 
     // Perform the transformation
@@ -77,7 +77,7 @@ void MatrixProcess::performIDCT(double* input, double* output)
                 FFTW_REDFT01, FFTW_REDFT01, FFTW_ESTIMATE);
     }
 
-    logger.info() << "Will execute IDCTplan with sizes: " << m_sizeXaxis << " "
+    logger.debug() << "Will execute IDCTplan with sizes: " << m_sizeXaxis << " "
             << m_sizeYaxis;
 
     // Perform the transformation

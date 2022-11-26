@@ -54,6 +54,11 @@ std::string getDateTimeString()
     return to_iso_string(now);
 }
 
+fs::path getFitsFilenameFromBase(const std::string& base)
+{
+    return fs::path(base + "_" + getDateTimeString() + ".fits");
+}
+
 // parse file to search for matching string
 bool fileHasField(fs::path fileName, const std::string& key)
 {

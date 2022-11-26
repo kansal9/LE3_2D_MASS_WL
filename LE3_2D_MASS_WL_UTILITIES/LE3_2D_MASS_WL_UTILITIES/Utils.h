@@ -94,6 +94,13 @@ bool checkFileType(fs::path fileName, const std::vector<char>& sign);
 std::string getDateTimeString();
 
 /**
+ * @brief       get a fits filename with timestamp
+ * @param[in]   <base> base filename
+ */
+fs::path getFitsFilenameFromBase(const std::string& base);
+
+
+/**
  * @brief         check if key exists in file
  * @param[in]     <boost::filesystem::path> filename
  * @param[in]     < string > string of text that need to be search in file
@@ -334,6 +341,11 @@ VecColumn<double> generateColumn(const std::string &name,
                                  std::vector<double>& data);
 
 /**
+ * @brief    Fixed number of iteration to perform reduced shear correction
+ */
+static const constexpr int REDUCESHEARNITER = 3;
+
+/**
  * @brief    FLOAT_EPSILON a constant value
  */
 constexpr double FLOAT_EPSILON = 5.96047e-08;
@@ -347,6 +359,7 @@ static const constexpr double rad2deg = double(180) / M_PI;
  * @brief    deg2rad (degree to radian conversion parameter) a constant value
  */
 static const constexpr double deg2rad = M_PI / double(180);
+
 /**
  * @brief    rotPhi a constant value
  */
@@ -393,6 +406,10 @@ void fillVecColumnLinspace(VecColumn<double>& col,
                            size_t N, double start, double stop,
                            bool endpoint = true);
 
+/**
+ * @brief    get the product type name from an xml file
+ * @param    <filepath> path to the xml filename
+ */
 std::string getXmlProductType(const fs::path& filepath);
 
 }  // namespace LE3_2D_MASS_WL_UTILITIES

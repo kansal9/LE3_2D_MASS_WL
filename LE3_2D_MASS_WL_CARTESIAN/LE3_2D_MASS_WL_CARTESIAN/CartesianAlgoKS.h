@@ -106,8 +106,16 @@ public:
      * @param     <outConvMap>, output convergence map
      * @param   <workdir>, <boost::filesystem::path> work directory
      */
-    void performInPainting(const ShearMap& shearMap, ConvergenceMap& outConvMap,
-            const fs::path& workdir);
+    void performInPainting(const ShearMap& shearMap, ConvergenceMap& outConvMap);
+
+    /**
+     * @brief     This function sums to shear
+     * @param     <shearMapA>, input shear map A
+     * @param     <shearMapB>, input shear map B
+     * @param     <shearMapSum>, output shear map
+     */
+    void sumShear(const ShearMap& shearMapA, const ShearMap& shearMapB,
+                  ShearMap& shearMapSum);
 
     /**
      * @brief   This function performs mass mapping main function
@@ -115,8 +123,7 @@ public:
      * @param   <convMap>, output convergence Map
      * @param   <workdir>, <boost::filesystem::path> work directory
      */
-    void performMassMapping(const ShearMap& shearMap, ConvergenceMap& convMap,
-            const fs::path& workdir);
+    void performMassMapping(const ShearMap& shearMap, ConvergenceMap& convMap);
 
     /**
      * @brief     This function performs reduced shear function
@@ -125,8 +132,8 @@ public:
      * @param     <outputConvMaps>, <boost::filesystem::path> name of the json/
      *            xml file which contains convergence maps name
      */
-    void performReducedShear(fs::path& inShearMap, const fs::path& workdir,
-            const fs::path& outputConvMapsJson);
+    void performReducedShear(const ShearMap& inShearMap,
+                             ConvergenceMap& outConvergenceMap);
 
     /**
      * @brief     This function turns input convergence into tilde convergence
@@ -134,6 +141,20 @@ public:
      * @param     <ConvMap>, input/output convergence map
      */
     void getTildeConvergence(ConvergenceMap& ConvMap);
+
+    /**
+     * @brief     This function accumulates square of convMap into snrMap
+     *            and compute snr when computeSnr is true
+     * @param     <ConvMap>, input convergence map
+     * @param     <snrMap>, output snr map
+     * @param     <denom>, denominator used is snr computation
+     * @param     <computeSnr>, do compute snr
+     */
+    void accumulateSquareAndComputeSnr(const ConvergenceMap& convMap,
+                                       ConvergenceMap& snrMap,
+                                       int denom,
+                                       bool computeSnr);
+
 
     /**
      * @brief     This function provides snr map
@@ -151,11 +172,16 @@ public:
      */
     void writeXMLfile(fs::path& inputConvMapsJson, fs::path& outputConvMapsXml);
 
+    /**
+     * @brief     This function returns a reference to the internal CartesianParam
+     */
+    CartesianParam& getCartesianParam() const;
+
 private:
     /**
      *  @brief <m_cartesianParam>, CartesianParam object with catalog parameters
      */
-    CartesianParam m_cartesianParam;
+    CartesianParam& m_cartesianParam;
 
 }; /* End of CartesianAlgoKS class */
 

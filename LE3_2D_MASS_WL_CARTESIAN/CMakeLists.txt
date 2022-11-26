@@ -14,6 +14,7 @@ elements_subdir(LE3_2D_MASS_WL_CARTESIAN)
 #         elements_depends_on_subdirs(ElementsKernel)
 #===============================================================================
 elements_depends_on_subdirs(ElementsKernel)
+elements_depends_on_subdirs(ST_DM_FilenameProvider)
 elements_depends_on_subdirs(LE3_2D_MASS_WL_UTILITIES)
 elements_depends_on_subdirs(LE3_2D_MASS_WL_SPHERICAL)
 
@@ -35,7 +36,7 @@ find_package(Cfitsio)
 #===============================================================================
 elements_add_library(LE3_2D_MASS_WL_CARTESIAN src/lib/*.cpp
                      INCLUDE_DIRS Cfitsio boost ElementsKernel
-                     LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_UTILITIES LE3_2D_MASS_WL_SPHERICAL pthread fftw3_threads fftw3 readline
+                     LINK_LIBRARIES ElementsKernel ST_DM_FilenameProvider LE3_2D_MASS_WL_UTILITIES LE3_2D_MASS_WL_SPHERICAL pthread fftw3_threads fftw3 readline
                      PUBLIC_HEADERS LE3_2D_MASS_WL_CARTESIAN)
 
 #===============================================================================
@@ -45,22 +46,13 @@ elements_add_library(LE3_2D_MASS_WL_CARTESIAN src/lib/*.cpp
 #                        LINK_LIBRARIES Boost ElementsExamples
 #                        INCLUDE_DIRS Boost ElementsExamples)
 #===============================================================================
-elements_add_executable(LE3_2D_MASS_WL_CartesianMapMaker src/program/CartesianMapMaker.cpp
-                     INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
-                     LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
-elements_add_executable(LE3_2D_MASS_WL_CartesianMassMapping src/program/CartesianMassMapping.cpp
-                     INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
-                     LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
-elements_add_executable(LE3_2D_MASS_WL_CartesianMCMaps src/program/CartesianMCMaps.cpp
+elements_add_executable(LE3_2D_MASS_WL_CartesianWL src/program/CartesianWL.cpp
                      INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
                      LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
 elements_add_executable(LE3_2D_MASS_WL_PatchesToSphere src/program/PatchesToSphere.cpp
                      INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
                      LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
 elements_add_executable(LE3_2D_MASS_WL_Filtering src/program/Filtering.cpp
-                     INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
-                     LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
-elements_add_executable(LE3_2D_MASS_WL_CartesianWL src/program/CartesianWL.cpp
                      INCLUDE_DIRS ElementsKernel LE3_2D_MASS_WL_CARTESIAN
                      LINK_LIBRARIES ElementsKernel LE3_2D_MASS_WL_CARTESIAN)
 #===============================================================================
@@ -105,10 +97,6 @@ elements_add_unit_test(ShearMap tests/src/ShearMap_test.cpp
                      TYPE Boost)
 elements_add_unit_test(ConvergenceMap tests/src/ConvergenceMap_test.cpp 
                      EXECUTABLE LE3_2D_MASS_WL_CARTESIAN_ConvergenceMap_test
-                     LINK_LIBRARIES LE3_2D_MASS_WL_CARTESIAN ElementsServices
-                     TYPE Boost)
-elements_add_unit_test(GetCartesianMCMaps tests/src/GetCartesianMCMaps_test.cpp 
-                     EXECUTABLE LE3_2D_MASS_WL_CARTESIAN_GetCartesianMCMaps_test
                      LINK_LIBRARIES LE3_2D_MASS_WL_CARTESIAN ElementsServices
                      TYPE Boost)
 elements_add_unit_test(FilterMR tests/src/FilterMR_test.cpp 

@@ -56,7 +56,7 @@ double Matrix::getFlux() const
 double Matrix::getSigma() const
 {
     unsigned int counts(1);
-    double x, m(0), m_old(0), v(0), v_old(0);
+    double x, m, m_old(0), v(0), v_old(0);
     for (unsigned i = 0; i != size1(); ++i)
     {
         for (unsigned j = 0; j != size2(); ++j)

@@ -24,6 +24,7 @@
 #ifndef _LE3_2D_MASS_WL_CARTESIAN_MATRIXPROCESS_H
 #define _LE3_2D_MASS_WL_CARTESIAN_MATRIXPROCESS_H
 #include "LE3_2D_MASS_WL_CARTESIAN/GenericMap.h"
+#include "LE3_2D_MASS_WL_UTILITIES/Matrix.h"
 #include <vector>
 #include <fftw3.h>
 

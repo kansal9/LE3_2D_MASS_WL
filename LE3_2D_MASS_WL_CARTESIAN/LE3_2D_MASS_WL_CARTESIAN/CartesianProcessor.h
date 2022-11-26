@@ -30,6 +30,14 @@
 #include <string>
 #include <map>
 
+#include "LE3_2D_MASS_WL_UTILITIES/CatalogData.h"
+#include "LE3_2D_MASS_WL_CARTESIAN/CartesianAlgoKS.h"
+
+#include "LE3_2D_MASS_WL_UTILITIES/DmOutput.h"
+#include "ST_DataModelBindings/dpd/le3/wl/twodmass/out/euc-test-le3-wl-twodmass-ConvergencePatch.h"
+
+using namespace dpd::le3::wl::twodmass::out::convergencepatch;
+
 using Elements::ExitCode;
 using boost::filesystem::path;
 using boost::program_options::value;
@@ -52,12 +60,13 @@ public:
     /**
      * @brief Constructor
      */
-    explicit CartesianProcessor(std::map<std::string, variable_value>& args);
+    explicit CartesianProcessor();
 
     /**
-     * @brief Constructor
+     * @brief     Constructor
+     * @param     <args> map of input parameters
      */
-    explicit CartesianProcessor(std::map<std::string, std::string>& args);
+    explicit CartesianProcessor(std::map<std::string, variable_value>& args);
 
     /**
      * @brief Parse the options for the parameter type
@@ -65,13 +74,43 @@ public:
     void parseOptions();
 
     /**
+     * @brief     Check that an option exist and throw exception if not
+     * @param     <key> option name to check
+     */
+    void checkOption(const std::string & key);
+
+    /**
+     * @brief     Set an option
+     * @param     <key> option name to set
+     * @param     <key> option value to set
+     */
+    template<class T>
+    void setOption(const std::string& key, const T& val);
+
+    /**
      * @brief Process the operation
      */
     void process();
 
+    /**
+     * @brief     Process the operation for a given patch
+     * @param     <cartesianAlgoKS> reference to CartesianAlgoKS object
+     * @param     <cat> reference to CatalogData object
+     */
+    void processPatch(CartesianAlgoKS& cartesianAlgoKS, CatalogData& cat);
+
+    /**
+     * @brief    Process the operation for a given patch and redshift bin
+     * @param     <cartesianAlgoKS> reference to CartesianAlgoKS object
+     * @param     <cat> reference to CatalogData object
+     */
+    void processZbin(CartesianAlgoKS& cartesianAlgoKS, CatalogData& cat);
+
+
 private:
-    std::map<std::string, std::string> m_args;
+    std::map<std::string, variable_value> m_args;
     path m_workdir;
+    path m_datadir;
     path m_paramfile;
     std::string m_paramtype;
     path m_shearCatalogPath;
@@ -79,9 +118,15 @@ private:
     path m_clusterCatalog;
     bool m_produceMcMaps;
 
-
 };
 // End of CartesianProcessor class
+
+template<class T>
+void CartesianProcessor::setOption(const std::string& key, const T& val)
+{
+    m_args[key] = variable_value(val, false);
+}
+
 
 }// namespace LE3_2D_MASS_WL_CARTESIAN
 

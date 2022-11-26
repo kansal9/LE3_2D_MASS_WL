@@ -124,7 +124,7 @@ public:
         // get out time running ID for filename part
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        logger.info() << "Using " << omp_get_max_threads() << " thread(s) max.";
+        //logger.info() << "Using " << omp_get_max_threads() << " thread(s) max.";
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Get the workdir, the data_dir and manage Input output

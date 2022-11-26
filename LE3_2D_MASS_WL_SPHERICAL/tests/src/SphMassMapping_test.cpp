@@ -146,8 +146,7 @@ BOOST_AUTO_TEST_CASE( reduceShearHealpix_test )
             massmapping.create_SheartoConvMap(g1_hmap, g2_hmap);
     std::pair<Healpix_Map<double>, Healpix_Map<double> > shearPair =
             std::make_pair(g1_hmap, g2_hmap);
-    int reducedIter = params.getRsNItReducedShear();
-    for (int it = 0; it < reducedIter; it++)
+    for (int it = 0; it < REDUCESHEARNITER; it++)
     {
         massmapping.computeReducedShear_hp(shearPair, convPair);
     }

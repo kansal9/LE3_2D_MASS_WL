@@ -63,7 +63,7 @@ public:
      * @brief         method check catalog format (fits/xml) and returns the visibility Mask data
      * @param[in]     <workdir> It's the working directory
      * @param[in]     <catalogName> It's the filename of the mask
-     * @param[in]     <data> <std::vector<std::vector<double> > > data of mask in vectors (ra, dec & weight)
+     * @param[in]     <data> <std::vector<std::vector<double>>> data of mask in vectors (ra, dec & weight)
      */
     void readVisibilityMask(fs::path& workdir, fs::path& catalogName,
             std::vector<std::vector<double> >& data);
@@ -72,7 +72,7 @@ public:
      * @brief         check catalog format (xml) and complaint with Data Model Product
      * @param[in]     <workdir> <boost::filesystem::path> work directory
      * @param[in]     <InFile> <boost::filesystem::path> Input Catalog name
-     * @param[in]     <data> <std::vector<std::vector<double> > > data of mask in vectors (ra, dec & weight)
+     * @param[in]     <data> <std::vector<std::vector<double>>> data of mask in vectors (ra, dec & weight)
      */
     void getMaskData(fs::path& workdir, fs::path& InFile,
             std::vector<std::vector<double> >& data);
@@ -80,7 +80,7 @@ public:
     /**
      * @brief         check catalog format (fits) and change pixel index to ra & dec
      * @param[in]     <filename> <const std::string> Input mask filename with path
-     * @param[in]     <data> <std::vector<std::vector<double> > > data of mask in vectors (ra, dec, pixel_index & weight)
+     * @param[in]     <data> <std::vector<std::vector<double>>> data of mask in vectors (ra, dec, pixel_index & weight)
      * @param[in]     <newNside> <int> Output resolution for map
      */
     void getMaskData(const std::string& filename,
@@ -90,7 +90,7 @@ public:
      * @brief         check catalog format (fits) and change pixel index to ra & dec
      * @param[in]     <filename> <const std::string> Input mask filename with path
      * @param[in]     <newNside> <int> Output resolution for map
-     * @param[out]    std::pair<Healpix_Map<double>, Healpix_Map<double> > Output maps
+     * @param[out]    std::pair<Healpix_Map<double>, Healpix_Map<double>> Output maps
      */
     std::pair<Healpix_Map<double>, Healpix_Map<double> > changeResolution(
             const std::string& filename);

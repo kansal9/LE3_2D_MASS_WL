@@ -46,9 +46,9 @@ InpaintingAlgo::InpaintingAlgo(const ShearMap& shearMap, GenericMap& mask,
         nbScales = int(log(shearMap.getXdim()) / log(2.)) - 2.;
     }
 
-    logger.info() << "axis dim: " << m_shearMap.getXdim() << " "
+    logger.debug() << "axis dim: " << m_shearMap.getXdim() << " "
             << m_shearMap.getYdim() << " " << m_shearMap.getZdim();
-    logger.info() << "number of scales: " << nbScales;
+    logger.debug() << "number of scales: " << nbScales;
 
     unsigned int count(0);
     unsigned int count2(0);
@@ -72,10 +72,10 @@ InpaintingAlgo::InpaintingAlgo(const ShearMap& shearMap, GenericMap& mask,
         }
     }
 
-    logger.info() << "sum of the mask: " << mask.getFlux(0);
-    logger.info() << "number of zeros: " << count;
-    logger.info() << "number of ones: " << count2;
-    logger.info() << "over the number of pixels: "
+    logger.debug() << "sum of the mask: " << mask.getFlux(0);
+    logger.debug() << "number of zeros: " << count;
+    logger.debug() << "number of ones: " << count2;
+    logger.debug() << "over the number of pixels: "
             << shearMap.getXdim() * shearMap.getYdim() * shearMap.getZdim();
 }
 
@@ -85,9 +85,9 @@ void InpaintingAlgo::performInPaintingAlgo(ConvergenceMap& convergenceMap)
     bool sigmaBounds = m_cartesianParam.isEqualVarPerScale();
     bool bModeZeros = m_cartesianParam.isForceBMode();
 
-    logger.info() << "number of inpainting iteration: " << nbIter;
-    logger.info() << "status of Equal variance per scale is: " << sigmaBounds;
-    logger.info() << "status of ForceBMode: " << bModeZeros;
+    logger.debug() << "number of inpainting iteration: " << nbIter;
+    logger.debug() << "status of Equal variance per scale is: " << sigmaBounds;
+    logger.debug() << "status of ForceBMode: " << bModeZeros;
 
     double maxThreshold(m_maxThreshold);
     double minThreshold(m_minThreshold);
@@ -95,29 +95,22 @@ void InpaintingAlgo::performInPaintingAlgo(ConvergenceMap& convergenceMap)
     ConvergenceMap DCTconvergenceMap(convergenceMap.getXdim(),
             convergenceMap.getYdim(), 2);
 
-    logger.info() << "convergenceMap size: " << convergenceMap.getXdim() << " "
+    logger.debug() << "convergenceMap size: " << convergenceMap.getXdim() << " "
             << convergenceMap.getYdim() << " " << convergenceMap.getZdim();
-    logger.info() << "DCTconvergenceMap size: " << DCTconvergenceMap.getXdim()
+    logger.debug() << "DCTconvergenceMap size: " << DCTconvergenceMap.getXdim()
             << " " << DCTconvergenceMap.getYdim() << " "
             << DCTconvergenceMap.getZdim();
 
     for (size_t iter = 0; iter < nbIter; iter++)
     {
-        logger.info() << "iteration " << iter << " beginning";
-        logger.info() << "Initializing kappa map";
+        logger.debug() << "iteration " << iter << " beginning";
+        logger.debug() << "Initializing kappa map";
 
         // Perform the DCT
         m_MP.performDCT(convergenceMap.getImageAddress(0),
                 DCTconvergenceMap.getImageAddress(0));
         m_MP.performDCT(convergenceMap.getImageAddress(1),
                 DCTconvergenceMap.getImageAddress(1));
-
-        // Update the threshold value with the max value (kappaE) at first iteration
-        // Unused: maxThreshold is fixed at 0.5
-        if (iter == 0 && maxThreshold <= 0.)
-        {
-            maxThreshold = DCTconvergenceMap.getMax(0);
-        }
 
         double lambda = minThreshold
                 + (maxThreshold - minThreshold) * (erfc(2.8 * iter / nbIter));
@@ -126,7 +119,7 @@ void InpaintingAlgo::performInPaintingAlgo(ConvergenceMap& convergenceMap)
         {
             lambda = minThreshold;
         }
-        logger.info() << "threshold: " << lambda;
+        logger.debug() << "threshold: " << lambda;
 
         // Keep in memory the 0 values of kappa
         double DCTkappaE0 = DCTconvergenceMap.getBinValue(0, 0, 0);
@@ -154,7 +147,7 @@ void InpaintingAlgo::performInPaintingAlgo(ConvergenceMap& convergenceMap)
 
         // Perform the inversion and apply the mask to get the final convergence map
         performInversionMask(convergenceMap, bModeZeros);
-        logger.info() << "end of iteration " << iter;
+        logger.debug() << "end of iteration " << iter;
 
     } // end loop on iterations
 }
@@ -236,9 +229,11 @@ void InpaintingAlgo::multiplyWaveletCoeff(Matrix& kScale, double& maskSigma,
 void InpaintingAlgo::performInversionMask(ConvergenceMap& convergenceMap,
         bool bModeZeros)
 {
-    // Force kappaB to zero if required
+    // Force kappaB to zero (in mask holes) if required
     if (bModeZeros)
     {
+        convergenceMap.setKappaBToZero();
+
         for (size_t i = 0; i < m_shearMap.getXdim(); i++)
         {
             for (size_t j = 0; j < m_shearMap.getYdim(); j++)
@@ -258,7 +253,7 @@ void InpaintingAlgo::performInversionMask(ConvergenceMap& convergenceMap,
     convergenceMap.getShearMap(workingShearMap);
 
     // Apply the mask on the shear map and perform inpainting on it (inplace)
-    logger.info() << "applying mask ";
+    logger.debug() << "applying mask ";
 
     for (size_t i = 0; i < m_shearMap.getXdim(); i++)
     {

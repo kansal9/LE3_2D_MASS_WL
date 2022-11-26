@@ -37,6 +37,7 @@
 #include "ST_DataModelBindings/dpd/le3/wl/twodmass/out/euc-test-le3-wl-twodmass-PeakCatalog.h"
 #include "ST_DataModelBindings/dictionary/pro/le3/wl/twodmass/euc-test-le3-wl-twodmass.h"
 #include "ST_DataModelBindings/dictionary/sys/euc-test-sys.h"
+#include "ST_DataModelBindings/dictionary/bas/fit/euc-test-fit.h"
 #include "ST_DM_HeaderProvider/GenericHeaderProvider.h"
 
 using namespace dpd::le3::wl::twodmass::out::convergenceclusters;
@@ -119,39 +120,17 @@ public:
     */
 
     /**
-     * @brief     Add fits file (Cartesian Patch Noised convergence map) to XML product
-     * @param[in] product, <dpdTwoDMassConvergencePatch> Convergence patch product
+     * @brief     Add fits file (cartesian patch) to XML product
+     * @param[in] product, <dpdTwoDMassConvergencePatch> convergence patch product
+     * @param[in] datatype, type of the product to add (entry in outputType enum)
      * @param[in] fits_out_filename, <filesystem::path> output fits filename including path
      * @return    None
      * @details   This method creates output product in xml format where it stores input
      *            fits output file in a data container of the XML file
      */
-    void createNoisedPatchXml(
+    void createPatchXml(
             std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
-            const fs::path& fits_out_filename);
-
-    /**
-     * @brief     Add fits file (Cartesian Patch DeNoised convergence map) to XML product
-     * @param[in] product, <dpdTwoDMassConvergencePatch> Convergence patch product
-     * @param[in] fits_out_filename, <filesystem::path> output fits filename including path
-     * @return    None
-     * @details   This method creates output product in xml format where it stores input
-     *            fits output file in a data container of the XML file
-     */
-    void createDenoisedPatchXml(
-            std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
-            const fs::path& fits_out_filename);
-
-    /**
-     * @brief     Add fits file (Cartesian Patch SNR convergence map) to XML product
-     * @param[in] product, <dpdTwoDMassConvergencePatch> Convergence patch product
-     * @param[in] fits_out_filename, <filesystem::path> output fits filename including path
-     * @return    None
-     * @details   This method creates output product in xml format where it stores input
-     *            fits output file in a data container of the XML file
-     */
-    void createSNRPatchOutputXml(
-            std::unique_ptr<dpdTwoDMassConvergencePatch> &product,
+            outputType datatype,
             const fs::path& fits_out_filename);
 
     /**
@@ -295,7 +274,7 @@ public:
      * @details   This method creates output product in xml format where it stores input
      *            fits output file in a data container of the XML file
      */
-    void createPatchtoSphereProjCntrPosXml(
+    void createPatchtoSphereProjCPosXml(
             std::unique_ptr<dpdTwoDMassConvergencePatchesToSphere> &product,
             const fs::path& fits_out_filename);
 

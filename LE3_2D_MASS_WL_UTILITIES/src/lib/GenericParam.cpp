@@ -33,7 +33,7 @@ namespace LE3_2D_MASS_WL_UTILITIES {
 GenericParam::GenericParam()
 {
     // parameters used to handle reduce shear
-    m_RSNItReducedShear = 10;
+    m_RSCorrection = false;
     m_RSThreshold = 5.0;
     m_RSGaussSTD = 0.0;
 
@@ -79,7 +79,7 @@ GenericParam::GenericParam()
 
 void GenericParam::print() const
 {
-    std::cout << "RSNItReducedShear: " << m_RSNItReducedShear << std::endl;
+    std::cout << "RSCorrection: " << m_RSCorrection << std::endl;
     std::cout << "RSThreshold: " << m_RSThreshold << std::endl;
     std::cout << "RSGaussSTD: " << m_RSGaussSTD << std::endl;
     std::cout << "DenoisingAlgo: " << m_DenoisingAlgo << std::endl;
@@ -299,14 +299,14 @@ void GenericParam::setRsGaussStd(double rsGaussStd)
     m_RSGaussSTD = rsGaussStd;
 }
 
-unsigned int GenericParam::getRsNItReducedShear() const
+bool GenericParam::getRsCorrection() const
 {
-    return m_RSNItReducedShear;
+    return m_RSCorrection;
 }
 
-void GenericParam::setRsNItReducedShear(int rsnItReducedShear)
+void GenericParam::setRsCorrection(bool rsCorrection)
 {
-    m_RSNItReducedShear = rsnItReducedShear;
+    m_RSCorrection = rsCorrection;
 }
 
 double GenericParam::getRsThreshold() const

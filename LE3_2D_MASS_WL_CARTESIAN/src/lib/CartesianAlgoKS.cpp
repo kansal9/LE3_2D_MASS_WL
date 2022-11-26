@@ -23,7 +23,10 @@
  */
 
 #include "LE3_2D_MASS_WL_CARTESIAN/CartesianAlgoKS.h"
+#include "LE3_2D_MASS_WL_UTILITIES/Utils.h"
+
 #include "ElementsKernel/Temporary.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
@@ -38,6 +41,11 @@ namespace LE3_2D_MASS_WL_CARTESIAN
 CartesianAlgoKS::CartesianAlgoKS(CartesianParam &params) :
         m_cartesianParam(params)
 {
+}
+
+CartesianParam& CartesianAlgoKS::getCartesianParam() const
+{
+    return m_cartesianParam;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -96,133 +104,12 @@ void CartesianAlgoKS::performInverseKSMassMapping(const ConvergenceMap& convMap,
 }
 
 ////////////////////////////////////////////////////////////////////////
-// Perform Reduced Shear Computation
-////////////////////////////////////////////////////////////////////////
-void CartesianAlgoKS::performReducedShear(fs::path& inShearMap,
-        const fs::path& workdir, const fs::path& outputConvMapsJson)
-{
-    // get vector of input shear map filepath
-    std::vector<fs::path> filenames = readFilenames(
-            workdir / "data" / inShearMap);
-
-    // iterate over input shear map(s)
-    for (size_t i = 0; i < filenames.size(); i++)
-    {
-        logger.info() << "performReducedShear on shear map " << filenames[i];
-
-        // load input shear map (gamma)
-        ShearMap reducedShear(filenames[i]);
-
-        if (m_cartesianParam.isAddBorder())
-        {
-            reducedShear.add_borders();
-        }
-
-        // create working convergence map (kappa) without copying values
-        ConvergenceMap convergenceMap(reducedShear, false);
-        ConvergenceMap tildeConvergenceMap;
-
-        // fill density image from shear map
-        convergenceMap.singleAxisCopy(reducedShear, 2);
-
-        // create vector of output convergence maps filenames (same for noisy and denoised)
-        std::vector<fs::path> convMapsFilenames;
-
-        size_t pos = (filenames[i].string()).find("ShearMap");
-
-        // loop over reduce iteration(s)
-        for (size_t it = 0; it < m_cartesianParam.getRsNItReducedShear(); it++)
-        {
-            // write current reduced shear
-            fs::path reducedShearMap(
-                    "EUC_LE3_WL_ShearMap_" + std::to_string(it) + "_Reduced"
-                            + (filenames[i].string()).substr(pos));
-            reducedShear.writeMap(workdir / "data" / reducedShearMap,
-                    m_cartesianParam);
-
-            // perform either KS or KS+ mass mapping (no filtering performed)
-            performMassMapping(reducedShear, convergenceMap, workdir);
-
-            logger.info() << "come back after performMassMapping";
-
-            // copy convergence to tilde convergence
-            tildeConvergenceMap = ConvergenceMap(convergenceMap);
-
-            logger.info() << "create copy into tildeConvergenceMap";
-
-            // filter kappaE using RSSigmaGauss and apply threshold
-            getTildeConvergence(tildeConvergenceMap);
-
-            logger.info() << "come back after getTildeConvergence";
-
-            // perform correction (after this: tildeConvergenceMap is not used anymore)
-            reducedShear.correctReducedShear(tildeConvergenceMap);
-
-            logger.info() << "come back after correctReducedShear";
-
-        } // end of reduced shear iteration numbers
-
-        logger.info() << "end of reduction";
-
-        // in case borders were added, remove them
-        if (m_cartesianParam.isAddBorder())
-        {
-            convergenceMap.remove_borders();
-        }
-
-        // set convergence filenames
-        auto outNoisyConvMap = fs::path(
-                "EUC_LE3_WL_NoisyConvergenceMapKS_"
-                        + (filenames[i].string()).substr(pos));
-        auto outDenoisedConvMap = fs::path(
-                "EUC_LE3_WL_DenoisedConvergenceMapKS_"
-                        + (filenames[i].string()).substr(pos));
-        std::string name = "KAPPA_PATCH";
-        m_cartesianParam.setExtName(name);
-
-        // Update convergence map filename with KSPlus instead of KS
-        if (m_cartesianParam.getNInpaint() != 0)
-        {
-            replaceSubStringInPath(outNoisyConvMap, "KS", "KSPlus");
-            replaceSubStringInPath(outDenoisedConvMap, "KS", "KSPlus");
-        }
-
-        // write noisy convergence
-        logger.info() << "Will write noisy convergence map to "
-                << outNoisyConvMap;
-        convergenceMap.writeMap(workdir / "data" / outNoisyConvMap,
-                m_cartesianParam);
-        convMapsFilenames.push_back(outNoisyConvMap);
-
-        // if filter is activated, filter and write denoised convergence map
-        if (fabs(m_cartesianParam.getGaussStd()) > 0.001)
-        {
-            convergenceMap.applyGaussianFilter(
-                    m_cartesianParam.getGaussStd());
-            convergenceMap.setKappaBToZero();
-
-            logger.info() << "Will write denoised convergence map to "
-                    << outDenoisedConvMap;
-            convergenceMap.writeMap(workdir / "data" / outDenoisedConvMap,
-                    m_cartesianParam);
-            convMapsFilenames.push_back(outDenoisedConvMap);
-        }
-
-        // write json file with convergence maps
-        fillJsonOutput(workdir, outputConvMapsJson, convMapsFilenames);
-
-    } //end of number of maps iterations
-
-    logger.info() << "end of performReducedShear";
-}
-
-////////////////////////////////////////////////////////////////////////
 // Perform Mass Mapping Function
 ////////////////////////////////////////////////////////////////////////
 void CartesianAlgoKS::performMassMapping(const ShearMap& shearMap,
-        ConvergenceMap& convMap, const fs::path& workdir)
+                                         ConvergenceMap& convMap )
 {
-    logger.info("KS/KSPlus conversion from Shear to Convergence Map");
+    logger.info("........ KS/KSPlus conversion from Shear to Convergence Map");
 
     // First mass mapping
     shearMap.getConvMap(convMap);
@@ -230,10 +117,88 @@ void CartesianAlgoKS::performMassMapping(const ShearMap& shearMap,
     // Perform inpainting
     if (m_cartesianParam.getNInpaint() != 0)
     {
-        performInPainting(shearMap, convMap, workdir);
+        performInPainting(shearMap, convMap);
+        logger.info() << ".......... exit performInPainting";
     }
 
-    logger.info() << "Exit performMassMapping";
+    logger.info() << "........ exit performMassMapping";
+}
+
+////////////////////////////////////////////////////////////////////////
+// Perform Reduced Shear Computation
+////////////////////////////////////////////////////////////////////////
+void CartesianAlgoKS::performReducedShear(const ShearMap& inShearMap,
+                                          ConvergenceMap& outConvergenceMap)
+{
+    // copy the input of shear map to working one, so it is not modified
+    ShearMap shearMap = ShearMap(inShearMap);
+
+    if (m_cartesianParam.isAddBorder())
+    {
+        shearMap.add_borders();
+    }
+
+    // fill density image from shear map, other axis are filled with 0
+    outConvergenceMap.singleAxisCopy(inShearMap, 2);
+
+    for (size_t it = 0; it <= REDUCESHEARNITER; it++)
+    {
+        // do not perform reduction at first iteration because convergence is
+        // initialised at 0
+        if(it > 0)
+        {
+            // filter kappaE using RSSigmaGauss and apply threshold to get an estimate
+            // of the E-mode to be used to correct the reduced shear
+            getTildeConvergence(outConvergenceMap);
+            logger.info() << "...... come back after getTildeConvergence";
+
+            // perform correction (after this: shearMap is a better estimate of the true shear
+            shearMap.correctReducedShear(outConvergenceMap);
+            logger.info() << "...... come back after correctReducedShear";
+        }
+
+        // perform either KS or KS+ mass mapping (no filtering performed) to
+        // get new convergence
+        performMassMapping(shearMap, outConvergenceMap);
+        logger.info() << ".... come back after performMassMapping";
+
+        // if correction is not activated, break the loop here, else do 3 iterations
+        if(!m_cartesianParam.getRsCorrection())
+        {
+            break;
+        }
+    } // end of reduced shear iteration
+    logger.info() << ".. end of reduction";
+
+    // in case borders were added, remove them
+    if (m_cartesianParam.isAddBorder())
+    {
+        outConvergenceMap.remove_borders();
+    }
+
+    // save the noisy convergence map before denoising (backup original gaussStd)
+    double gaussStd = m_cartesianParam.getGaussStd();
+    m_cartesianParam.setGaussStd(0);
+    logger.info() << "Saving noisy convergence map";
+    m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
+    outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceNoisy"], m_cartesianParam);
+
+    // restore gaussStd value
+    m_cartesianParam.setGaussStd(gaussStd);
+
+    // if filter is activated, filter and write denoised convergence map
+    if (fabs(m_cartesianParam.getGaussStd()) > 0.001)
+    {
+        outConvergenceMap.applyGaussianFilter(m_cartesianParam.getGaussStd());
+        outConvergenceMap.setKappaBToZero();
+
+        // save the denoised convergence map
+        logger.info() << "saving denoised convergence map";
+        m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
+        outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceDenoised"], m_cartesianParam);
+    }
+
+    logger.info() << "end of performReducedShear";
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -249,7 +214,7 @@ void CartesianAlgoKS::getTildeConvergence(ConvergenceMap& ConvMap)
 
     // get kappaB std
     double std_dev = ConvMap.getSigma(1);
-    logger.info() << "std dev: " << std_dev;
+    logger.debug() << "std dev: " << std_dev;
 
     // apply threshold
     ConvMap.applyThreshold(m_cartesianParam.getRsThreshold() * std_dev, 0);
@@ -259,143 +224,73 @@ void CartesianAlgoKS::getTildeConvergence(ConvergenceMap& ConvMap)
 // Perform Inpainting
 ////////////////////////////////////////////////////////////////////////
 void CartesianAlgoKS::performInPainting(const ShearMap& shearMap,
-        ConvergenceMap& outConvMap, const fs::path& workdir)
+                                        ConvergenceMap& outConvMap)
 {
     GenericMap mask(shearMap.getXdim(), shearMap.getYdim(), 1);
+
+    // In all Inpainting methods, shearMap is const ref to the reduced shear
     InpaintingAlgo myIPalgo(shearMap, mask, m_cartesianParam);
 
     myIPalgo.performInPaintingAlgo(outConvMap);
-
-    auto maskFilepath = fs::path(
-            "InPaintingMask_" + getDateTimeString() + ".fits");
-    mask.writeMap(workdir / "data" / maskFilepath, m_cartesianParam);
-
-    logger.info() << "Exit performInPainting";
 }
 
 ////////////////////////////////////////////////////////////////////////
-void CartesianAlgoKS::getSNRMap(fs::path& workdir, fs::path& NReMaps,
-        fs::path& outConvergenceMap)
+// Sum two shear maps
+////////////////////////////////////////////////////////////////////////
+void CartesianAlgoKS::sumShear(const ShearMap& shearMapA, const ShearMap& shearMapB,
+        ShearMap& shearMapSum)
 {
-    std::vector<fs::path> filenames = readFilenamesInJson(NReMaps);
+    assert (shearMapA.getXdim() == shearMapB.getXdim());
+    assert (shearMapA.getXdim() == shearMapSum.getXdim());
+    assert (shearMapA.getYdim() == shearMapB.getYdim());
+    assert (shearMapA.getYdim() == shearMapSum.getYdim());
 
-    // extract NReSample maps
-    std::vector<fs::path> filenamesNReMaps;
-    for (size_t i = 0; i < filenames.size(); i++)
+    for (size_t j = 0; j < shearMapA.getXdim(); j++)
     {
-        if ((filenames[i].string()).find("NReSample") != std::string::npos)
+        for (size_t i = 0; i < shearMapA.getYdim(); i++)
         {
-            filenamesNReMaps.push_back(filenames[i]);
+            std::complex<double> gA(shearMapA.getBinValue(i, j, 0),
+                                    shearMapA.getBinValue(i, j, 1));
+
+            std::complex<double> gB(shearMapB.getBinValue(i, j, 0),
+                                    shearMapB.getBinValue(i, j, 1));
+
+            std::complex<double> gSum = (gA + gB) / (std::complex<double>(1, 0) + std::conj(gA) * gB);
+            double real = std::real(gSum);
+            double imag = (m_cartesianParam.isForceBMode() == true) ? 0 : std::imag(gSum);
+
+            shearMapSum.setBinValue(i, j, 0, real);
+            shearMapSum.setBinValue(i, j, 1, imag);
         }
     }
+}
 
-    size_t N = filenamesNReMaps.size();
-    logger.info() << "number of sampled maps: " << N;
-
-    // create ouput SNR convergenceMap
-    ConvergenceMap snrMap;
-
-    for (size_t i = 0; i < N; i++)
+////////////////////////////////////////////////////////////////////////
+// Accumulate squares
+////////////////////////////////////////////////////////////////////////
+void CartesianAlgoKS::accumulateSquareAndComputeSnr(const ConvergenceMap& convMap,
+                                                    ConvergenceMap& snrMap,
+                                                    int denom = 1,
+                                                    bool computeSnr = false)
+{
+    // accumulate square of the values
+    for (size_t z = 0; z < snrMap.getZdim(); z++)
     {
-        logger.info() << "filenames: " << filenamesNReMaps[i];
-
-        // load convergence map
-        ConvergenceMap SampledMap(filenamesNReMaps[i]);
-
-        // resize SNR map to size of first one
-        if (i == 0)
+        for (size_t y = 0; y < snrMap.getYdim(); y++)
         {
-            size_t xbin = SampledMap.getXdim();
-            size_t ybin = SampledMap.getYdim();
-            size_t zbin = SampledMap.getZdim();
-            snrMap = ConvergenceMap(xbin, ybin, zbin);
-            for (size_t z = 0; z < snrMap.getZdim(); z++)
+            for (size_t x = 0; x < snrMap.getXdim(); x++)
             {
-                snrMap.clear(z);
-            }
-        }
+                double val = snrMap.getBinValue(x, y, z)
+                        + pow(convMap.getBinValue(x, y, z), 2);
+                snrMap.setBinValue(x, y, z, val);
 
-        // accumulate square of the values
-        for (size_t z = 0; z < snrMap.getZdim(); z++)
-        {
-            for (size_t y = 0; y < snrMap.getYdim(); y++)
-            {
-                for (size_t x = 0; x < snrMap.getXdim(); x++)
+                if (computeSnr)
                 {
-                    double val = snrMap.getBinValue(x, y, z)
-                            + pow(SampledMap.getBinValue(x, y, z), 2);
-                    snrMap.setBinValue(x, y, z, val);
-
-                    // at last iteration, compute square root of mean
-                    if (i == N - 1)
-                    {
-                        double mean = snrMap.getBinValue(x, y, z) / double(N);
-                        snrMap.setBinValue(x, y, z, sqrt(mean));
-                    }
+                    snrMap.setBinValue(x, y, z, sqrt(val / double(denom)));
                 }
             }
         }
-    }  // end loop on input convergence map
-
-    // set default name if empty
-    if (outConvergenceMap.string().empty())
-    {
-        outConvergenceMap = fs::path(
-                "EUC_LE3_WL_SNRConvergenceMap_" + getDateTimeString()
-                        + ".fits");
     }
-
-    std::string name = "KAPPA_PATCH";
-    m_cartesianParam.setExtName(name);
-    snrMap.writeMap((workdir / "data" / outConvergenceMap).native(),
-            m_cartesianParam);
-
-}
-////////////////////////////////////////////////////////////////////////
-// write xml files
-////////////////////////////////////////////////////////////////////////
-void CartesianAlgoKS::writeXMLfile(fs::path& inputConvMapsJson,
-        fs::path& outputConvMapsXml)
-{
-    // Create a DMOutput object
-    DmOutput dm;
-
-    std::string file = outputConvMapsXml.string();
-    int NResamples = m_cartesianParam.getNResamples();
-
-    auto filenameJson = inputConvMapsJson.filename();
-    // auto workdir = outConvergenceMapJson.parent_path();
-
-    std::vector<fs::path> filenames = readFilenamesInJson(filenameJson);
-    const fs::path outfile { file };
-
-    if ((m_cartesianParam.getParaFileType()).compare("Conv_Patch") == 0)
-    {
-        const std::string product_type = "DpdTwoDMassConvergencePatch";
-        auto product = initProduct<dpdTwoDMassConvergencePatch,
-                twoDMassCollectConvergencePatch, int>(product_type, NResamples);
-        for (size_t i = 0; i < filenames.size(); i++)
-        {
-            fs::path mapOut(filenames[i].native());
-            if ((mapOut.string()).find("NoisyConvergence") != std::string::npos)
-            {
-                logger.info() << "writing file: " << mapOut;
-                dm.createNoisedPatchXml(product, mapOut);
-            }
-            if ((mapOut.string()).find("DenoisedConvergence")
-                    != std::string::npos)
-            {
-                dm.createDenoisedPatchXml(product, mapOut);
-            }
-            if ((mapOut.string()).find("SNRConvergence") != std::string::npos)
-            {
-                dm.createSNRPatchOutputXml(product, mapOut);
-            }
-        }
-        writeProduct<dpdTwoDMassConvergencePatch>(product, outfile);
-    }
-
-    logger.info() << "DM output products created in: " << file;
 }
 
 }// namespace LE3_2D_MASS_WL_CARTESIAN

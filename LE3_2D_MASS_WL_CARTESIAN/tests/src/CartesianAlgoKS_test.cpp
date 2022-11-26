@@ -130,8 +130,7 @@ BOOST_AUTO_TEST_CASE( overallCartesianAlgo_test )
         outputShearMap.singleAxisCopy(inputShearMap, 2);
 
         std::cout << "PerformKSMassMapping_test" << std::endl;
-        CartesainAlgo.performMassMapping(inputShearMap, convergenceMap,
-                test_path);
+        CartesainAlgo.performMassMapping(inputShearMap, convergenceMap);
 
         std::cout << "PerformInverseKSMassMapping_test" << std::endl;
         CartesainAlgo.performInverseKSMassMapping(convergenceMap,

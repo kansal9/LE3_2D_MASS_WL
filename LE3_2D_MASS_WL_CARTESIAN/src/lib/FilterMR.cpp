@@ -120,24 +120,20 @@ double FilterMR::myErfInv(double x)
 double FilterMR::xerfc(double F)
 {
     double Nu = 0;
-    double P = F;
-    if (P >= 1.)
+    if (F < 1.)
     {
-        P = 1.;
-    }
-    else
-    {
-        if (P < 0)
+        if (F < 0)
         {
-            P = 0.;
+            F = 0.;
         }
-        if (P > 0.5)
+
+        if (F > 0.5)
         {
-            Nu = sqrt(2.) * myErfInv(1 - ((1. - P) / 0.5));
+            Nu = sqrt(2.) * myErfInv(1 - ((1. - F) / 0.5));
         }
         else
         {
-            Nu = -sqrt(2.) * xerfc((double) P / 0.5);
+            Nu = -sqrt(2.) * xerfc((double) F / 0.5);
         }
     }
     return Nu;
@@ -145,7 +141,7 @@ double FilterMR::xerfc(double F)
 
 double FilterMR::getProbility(double val, double sigLevel)
 {
-    double P = 0., vn = 0.;
+    double P = 0;
     if (fabs(val) < FLOAT_EPSILON)
     {
         P = 1.;
@@ -158,7 +154,7 @@ double FilterMR::getProbility(double val, double sigLevel)
         }
         else
         {
-            vn = fabs(val) / (sqrt(2.) * sigLevel);
+            double vn = fabs(val) / (sqrt(2.) * sigLevel);
             if (vn > 3.5)
             {
                 P = 0.;
@@ -499,10 +495,9 @@ void FilterMR::estimateNewAlphaParam(std::vector<Matrix>& band,
         std::vector<double>& regulMax, std::vector<double>& TabAlpha,
         std::vector<double>& TabDelta)
 {
-    double sigmaNoise;
     for (int b = m_FirstScale - 1; b < m_nbScales - 1; b++)
     {
-        sigmaNoise = 0.;
+        double sigmaNoise = 0.;
         double sigmaCoeff = m_SigmaNoise * NormB3Spline[b];
 
         for (int j = 0; j < m_Yaxis; j++)
@@ -532,7 +527,7 @@ void FilterMR::fixedAlphaFilter(std::vector<Matrix>& band,
         LE3_2D_MASS_WL_CARTESIAN::ReconstructMR & restore)
 {
 
-    double alphaP, val = 0.;
+    double alphaP, val;
     for (int b = 0; b < m_nbScales - 1; b++)
     {
         //  std::cout << "rp: " << TabAlpha[b] <<std::endl;

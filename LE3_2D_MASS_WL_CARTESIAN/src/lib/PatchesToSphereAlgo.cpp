@@ -50,21 +50,20 @@ bool PatchesToSphereAlgo::getNoisyConvergenceMaps(fs::path& workdir,
         SigmaGauss = m_cartesianParam.getGaussStd();
     }
     m_cartesianParam.setGaussStd(0.);
-    size_t pos;
     std::ofstream outfile;
     outfile.open((workdir / outputMaps).string(), std::ios_base::app);
     outfile << "[";
     for (size_t i = 0; i < filenames.size(); i++)
     {
         logger.info() << filenames[i];
-        pos = (filenames[i].string()).find("ShearMap");
+        size_t pos = (filenames[i].string()).find("ShearMap");
         fs::path outConvergenceMap(
                 "EUC_LE3_WL_NoisyConvergenceMapKS_"
                         + (filenames[i].string()).substr(pos));
 
         ShearMap shearMap(datadir / filenames[i]);
         ConvergenceMap convergenceMap(shearMap, false);
-        CartesainAlgo.performMassMapping(shearMap, convergenceMap, workdir);
+        CartesainAlgo.performMassMapping(shearMap, convergenceMap);
         convergenceMap.writeMap(datadir / outConvergenceMap, m_cartesianParam);
 
         outfile << outConvergenceMap.filename();
@@ -89,21 +88,20 @@ bool PatchesToSphereAlgo::getDeNoisyConvergenceMaps(fs::path& workdir,
     { };
     std::vector<fs::path> filenames = readFilenamesInJson(workdir / InShearMap);
     fs::path datadir = workdir / "data";
-    size_t pos;
     std::ofstream outfile;
     outfile.open((workdir / outputMaps).string(), std::ios_base::app);
     outfile << "[";
 
     for (size_t i = 0; i < filenames.size(); i++)
     {
-        pos = (filenames[i].string()).find("ShearMap");
+        size_t pos = (filenames[i].string()).find("ShearMap");
         outConvergenceMap = fs::path(
                 "EUC_LE3_WL_DenoisedConvergenceMapKS_"
                         + (filenames[i].string()).substr(pos));
 
         ShearMap shearMap(datadir / filenames[i]);
         ConvergenceMap convergenceMap(shearMap, false);
-        CartesainAlgo.performMassMapping(shearMap, convergenceMap, workdir);
+        CartesainAlgo.performMassMapping(shearMap, convergenceMap);
 
         outfile << outConvergenceMap.filename();
         if (i < filenames.size() - 1)
@@ -254,7 +252,7 @@ void PatchesToSphereAlgo::writePrimaryHeader(const Hdu &hdu)
             { "SOFTNAME", "LE3_2D_MASS_WL_KS", "",
                     "Software used to create the product" },
             { "SOFTVERS", SWVersion, "", "Software version" },
-            { "NITREDSH", m_cartesianParam.getRsNItReducedShear(), "",
+            { "NITREDSH", m_cartesianParam.getRsCorrection() ? REDUCESHEARNITER : 0, "",
                     "Number of iterations for reduced shear" },
             { "NITINP", m_cartesianParam.getNInpaint(), "",
                     "Number of iterations for inpainting" },

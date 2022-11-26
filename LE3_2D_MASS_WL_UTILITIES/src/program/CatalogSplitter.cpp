@@ -147,7 +147,7 @@ public:
         ////////////////////////////////////////////////////////////////////////
         // get out time running ID for filename part
         ////////////////////////////////////////////////////////////////////////
-        logger.info() << "Using " << omp_get_max_threads() << " thread(s) max.";
+        // logger.info() << "Using " << omp_get_max_threads() << " thread(s) max.";
 
         ////////////////////////////////////////////////////////////////////////
         // Get the workdir, the datadir and manage Input output
@@ -184,7 +184,7 @@ public:
         or xmlProductType == "DpdTwoDMassParamsConvergencePatchesToSphere")
         {
             CartesianParam& cartesianParam = static_cast<CartesianParam&>(params);
-            readParameterFile(parameterFile, cartesianParam, cat, 0., 0., 0., 0.);
+            readParameterFile(parameterFile, cartesianParam, cat);
         }
         else if(xmlProductType == "DpdTwoDMassParamsConvergenceSphere")
         {

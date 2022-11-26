@@ -38,7 +38,7 @@ ConvergenceMap::ConvergenceMap(GenericMap const& copyMap, bool copyValues) :
 
 void ConvergenceMap::getShearMap(ShearMap& outputShearMap) const
 {
-    logger.info() << "Will perform getShearMap with sizes: " << m_sizeXaxis
+    logger.debug() << "Will perform getShearMap with sizes: " << m_sizeXaxis
             << " " << m_sizeYaxis;
 
     double fftFactor = 1.0 / (m_sizeXaxis * m_sizeYaxis);
@@ -173,8 +173,8 @@ void ConvergenceMap::applyGaussianFilter(float sigmax, float sigmay, int k)
     mp.performDFT(getImageAddress(k), signalTf);
 
     // perform multiplication with the kernel
-    int i = 0;
-    int sgn = 1;
+    int i;
+    int sgn;
     for (int x = 0; x < sizeXaxisFreq; x++)
     {
         for (int y = 0; y < sizeYaxisFreq; y++)

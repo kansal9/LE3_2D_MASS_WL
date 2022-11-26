@@ -63,7 +63,7 @@ public:
      * @param   <cat> shear catalog to define balances redshift
      */
     void readConvPatchXMLFile(const fs::path& paramConvergencePatch,
-                              CatalogData& cat);
+                              const CatalogData& cat);
 
     /**
      * @brief   function to read the convergence Clusters parameter file in XML wrt dpd
@@ -76,18 +76,27 @@ public:
     /**
      * @brief   function to read the parameter file to create convergence Patches to sphere in XML wrt dpd
      * @param   <paramConvClusters> parameter filename in <string> format
-     * @param   <catRamin> Minimum RA value from input survey in double
-     * @param   <catRamax> Maximum RA value from input survey in double
-     * @param   <catDecmin> Minimum DEC value from input survey in double
-     * @param   <catDecmax> Maximum DEC value from input survey in double
      */
     void readConvPatchesToSphereXMLFile(
-            const fs::path& paramConvPatchesToSphere, double& catRamin,
-            double& catRamax, double& catDecmin, double& catDecmax,
-            CatalogData& cat);
+            const fs::path& paramConvPatchesToSphere, const CatalogData& cat);
+
+    /**
+     * current redshift bin index
+     */
+    int m_currIzbin = 0;
+
+    /**
+     * current patch index
+     */
+    int m_currIpatch = 0;
+
+    /**
+     * map of product filenames
+     */
+    std::map<std::string, fs::path> m_currOutFilesPath;
+
 
 private:
-
 
 }; // End of CartesianParam class
 
@@ -95,14 +104,9 @@ private:
  * @brief     reads the parameter file and fill the param object
  * @param     <ParamFile>, <boost::filesystem::path> Parameter filename with path
  * @param     <params>, <LE3_2D_MASS_WL_CARTESIAN::CartesianParam> object to return parameters
- * @param     <catRamin> Minimum RA value from input survey in double
- * @param     <catRamax> Maximum RA value from input survey in double
- * @param     <catDecmin> Minimum DEC value from input survey in double
- * @param     <catDecmax> Maximum DEC value from input survey in double
  */
 void readParameterFile(const fs::path& ParamFile,
-        CartesianParam &params, CatalogData& shearCat, double catRamin = 0.,
-        double catRamax = 0., double catDecmin = 0., double catDecmax = 0.,
+        CartesianParam &params, const CatalogData& shearCat,
         const CatalogData& clusterCat = CatalogData());
 
 }  // namespace LE3_2D_MASS_WL_CARTESIAN

@@ -41,9 +41,7 @@ namespace LE3_2D_MASS_WL_CARTESIAN
  * @brief   main parser function for cartesian parameters
  */
 void readParameterFile(const fs::path& ParamFile, CartesianParam &params,
-                       CatalogData& shearCat,
-                       double catRamin, double catRamax,
-                       double catDecmin, double catDecmax,
+                       const CatalogData& shearCat,
                        const CatalogData& clusterCat)
 {
     logger.info() << "Using file: " << ParamFile << " as DM input product";
@@ -52,24 +50,23 @@ void readParameterFile(const fs::path& ParamFile, CartesianParam &params,
         logger.error() << "File is not in xml format";
         return;
     }
-    if (getXmlProductType(ParamFile) == "DpdTwoDMassParamsConvergenceClusters")
+    auto product_type = getXmlProductType(ParamFile);
+    if (product_type == "DpdTwoDMassParamsConvergenceClusters")
     {
         logger.info() << "Parameter file: Cluster Convergence Patches";
         params.readConvClustersXMLFile(ParamFile, clusterCat);
         logger.info() << "Done reading Convergence Clusters parameter";
     }
-    else if (getXmlProductType(ParamFile) == "DpdTwoDMassParamsConvergencePatch")
+    else if (product_type == "DpdTwoDMassParamsConvergencePatch")
     {
         logger.info() << "Parameter file: Convergence Patch";
         params.readConvPatchXMLFile(ParamFile, shearCat);
         logger.info() << "Done reading Convergence Patch parameter";
     }
-    else if (getXmlProductType(ParamFile) ==
-                                  "DpdTwoDMassParamsConvergencePatchesToSphere")
+    else if (product_type == "DpdTwoDMassParamsConvergencePatchesToSphere")
     {
         logger.info() << "Parameter file: Convergence Patches To Sphere";
-        params.readConvPatchesToSphereXMLFile(ParamFile, catRamin, catRamax,
-                                              catDecmin, catDecmax, shearCat);
+        params.readConvPatchesToSphereXMLFile(ParamFile, shearCat);
         logger.info() << "Done reading Convergence Patches To Sphere parameter";
     }
 }
@@ -86,7 +83,7 @@ CartesianParam::CartesianParam()
  * @brief   function to read Convergence Patches parameter XML file
  */
 void CartesianParam::readConvPatchXMLFile(const fs::path& filepath,
-                                          CatalogData& cat)
+                                          const CatalogData& cat)
 {
     try
     {
@@ -102,7 +99,9 @@ void CartesianParam::readConvPatchXMLFile(const fs::path& filepath,
         setAddBorder(data_xml.GapsParams().AddBorder());
 
         // redshift parameters: fill zmin and zmax vectors
-        readRedshiftBaseParams<twoDMassParamsConvergencePatch>(data_xml, cat);
+        // catalog will be sorted in redshift
+        CatalogData& _cat = const_cast<CatalogData&>(cat);
+        readRedshiftBaseParams<twoDMassParamsConvergencePatch>(data_xml, _cat);
 
         // patch parameters
         auto& pp_xml = data_xml.PatchParams();
@@ -180,9 +179,7 @@ void CartesianParam::readConvClustersXMLFile(const fs::path& filepath,
 }
 
 void CartesianParam::readConvPatchesToSphereXMLFile(
-        const fs::path& filepath, double& catRamin,
-        double& catRamax, double& catDecmin, double& catDecmax,
-        CatalogData& cat)
+        const fs::path& filepath, const CatalogData& cat)
 {
     try
     {
@@ -197,7 +194,9 @@ void CartesianParam::readConvPatchesToSphereXMLFile(
         setAddBorder(data_xml.GapsParams().AddBorder());
 
         // redshift parameters: fill zmin and zmax vectors
-        readRedshiftBaseParams<twoDMassParamsConvergencePatchesToSphere>(data_xml, cat);
+        // catalog will be sorted in redshift
+        CatalogData& _cat = const_cast<CatalogData&>(cat);
+        readRedshiftBaseParams<twoDMassParamsConvergencePatchesToSphere>(data_xml, _cat);
 
         // multipatch parameters
         setNside(data_xml.MultiPatchParams().Nside());
@@ -206,8 +205,13 @@ void CartesianParam::readConvPatchesToSphereXMLFile(
         double width = data_xml.MultiPatchParams().PatchWidth() * deg2rad;
         double size = data_xml.MultiPatchParams().PixelSize() / 60. * deg2rad;
         double d_overlap = 1 + getOverlap();
-        double ddec = catDecmax - catDecmin;
-        double dra = catRamax - catRamin;
+
+        double catDecMin, catDecMax, catRaMin, catRaMax;
+        cat.getMinMax("ra", catRaMin, catRaMax);
+        cat.getMinMax("dec", catDecMin, catDecMax);
+
+        double ddec = catDecMax - catDecMin;
+        double dra = catRaMax - catRaMin;
 
         int nlat = int((ddec * d_overlap) / width) + 1;
         double dtheta_lat = ddec / nlat;
@@ -215,14 +219,14 @@ void CartesianParam::readConvPatchesToSphereXMLFile(
         m_Patches.clear();
         for (int i = 0; i < nlat; i++)
         {
-            double lat = i * dtheta_lat + dtheta_lat / 2. + catDecmin;
+            double lat = i * dtheta_lat + dtheta_lat / 2. + catDecMin;
 
             // number of patches in longitude wrt overlap and size of the survey
             int nlon = int((dra * cos((i+0.5)*width) * d_overlap) / width) + 1;
             double dtheta_lon = (dra * cos((i+0.5)*width)) / nlon;
             for (int j = 0; j < nlon; j++)
             {
-                double lon = j * dtheta_lon + dtheta_lon / 2. + catRamin;
+                double lon = j * dtheta_lon + dtheta_lon / 2. + catRaMin;
                 m_Patches.emplace_back(lon, lat, width, size);
             }
         }

@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( overall_test )
 {
     std::cout << " --> SphericalParam: Overall_test" << std::endl;
 
-    BOOST_CHECK_EQUAL(param.getRsNItReducedShear(), 2);
+    BOOST_CHECK(param.getRsCorrection());
     BOOST_CHECK_EQUAL(param.getRsThreshold(), 5);
     BOOST_CHECK_CLOSE(param.getRsGaussStd(), 0, 1.0e-07);
 

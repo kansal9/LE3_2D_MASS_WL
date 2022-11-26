@@ -40,6 +40,7 @@ using namespace LE3_2D_MASS_WL_UTILITIES;
 namespace fs = boost::filesystem;
 
 using Elements::TempDir;
+using Elements::TempFile;
 
 using std::string;
 
@@ -62,7 +63,8 @@ struct DmOutputTestFixture
 //-----------------------------------------------------------------------------
 BOOST_AUTO_TEST_SUITE (DmOutput_test)
 //-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(getGenericHeader_test, DmOutputTestFixture)
+// BOOST_FIXTURE_TEST_CASE(getGenericHeader_test, DmOutputTestFixture)
+BOOST_AUTO_TEST_CASE(getGenericHeader_test)
 {
     try {
         // Create generator
@@ -75,44 +77,38 @@ BOOST_FIXTURE_TEST_CASE(getGenericHeader_test, DmOutputTestFixture)
     }
 }
 //-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(createNoisedPatchXml_test, DmOutputTestFixture)
+BOOST_FIXTURE_TEST_CASE(createPatchXml_test, DmOutputTestFixture)
 {
-    std::cout << "-- DmOutput:createNoisedPatchXml_test" << std::endl;
-    try {
-        fs::path fitsFile{ "testFile.fits" };
-        const fs::path file = test_path / "NoisedConvergenceMapPatch.xml";
-        std::string product_type = "DpdTwoDMassConvergencePatch";
-        int NResamples = 0;
-
-        auto product = initProduct<dpdTwoDMassConvergencePatch,
-                                   twoDMassCollectConvergencePatch,
-                                   int>(product_type, NResamples);
-
-        dm.createNoisedPatchXml(product, fitsFile);
-        writeProduct<dpdTwoDMassConvergencePatch>(product, file);
-    BOOST_CHECK(fs::is_regular_file(file));
-    } catch (std::exception& e) {
-        BOOST_THROW_EXCEPTION(e);
-    }
-}
-//-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(createDenoisedPatchXml_test, DmOutputTestFixture)
-{
-    std::cout << "-- DmOutput:createDenoisedPatchXml_test" << std::endl;
+    std::cout << "-- DmOutput:createPatchXml_test" << std::endl;
     try
     {
-        fs::path fitsFile{ "testFile.fits" };
-        const fs::path filename = test_path / "DenoisedConvergenceMapPatch.xml";
         std::string product_type = "DpdTwoDMassConvergencePatch";
         int NResamples = 0;
-
         auto product = initProduct<dpdTwoDMassConvergencePatch,
                                    twoDMassCollectConvergencePatch,
                                    int>(product_type, NResamples);
 
-        dm.createDenoisedPatchXml(product, fitsFile);
-        writeProduct<dpdTwoDMassConvergencePatch>(product, filename);
-        BOOST_CHECK(fs::is_regular_file(filename));
+        TempFile f1, f2, f3, f4;
+        fs::ofstream ofs(f1.path());
+        ofs.close();
+        ofs.open(f2.path());
+        ofs.close();
+        ofs.open(f3.path());
+        ofs.close();
+
+        const fs::path file = test_path / "Patch.xml";
+
+        // add existing file
+        dm.createPatchXml(product, outputType::NoisedPatch, f1.path());
+        dm.createPatchXml(product, outputType::DenoisedPatch, f2.path());
+        dm.createPatchXml(product, outputType::SNRPatch, f3.path());
+
+        // nothing will be done if file does not exist
+        dm.createPatchXml(product, outputType::SNRPatch, f4.path());
+
+        writeProduct<dpdTwoDMassConvergencePatch>(product, file);
+
+    BOOST_CHECK(fs::is_regular_file(file));
     } catch (std::exception& e) {
         BOOST_THROW_EXCEPTION(e);
     }
@@ -141,54 +137,6 @@ BOOST_FIXTURE_TEST_CASE(createSingleClusterXml_test, DmOutputTestFixture)
     }
 }
 */
-//-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(createSNRPatchOutputXml_test, DmOutputTestFixture)
-{
-    std::cout << "-- DmOutput:createSNRPatchOutputXml_test" << std::endl;
-    try
-    {
-        fs::path fitsFile{ "testFile.fits" };
-        const fs::path filename = test_path / "SNRPatch.xml";
-        std::string product_type = "DpdTwoDMassConvergencePatch";
-        int NResamples = 2;
-
-        auto product = initProduct<dpdTwoDMassConvergencePatch,
-                                  twoDMassCollectConvergencePatch,
-                                  int>(product_type, NResamples);
-
-        dm.createSNRPatchOutputXml(product, fitsFile);
-        writeProduct<dpdTwoDMassConvergencePatch>(product, filename);
-        BOOST_CHECK(fs::is_regular_file(filename));
-    } catch (std::exception& e) {
-        BOOST_THROW_EXCEPTION(e);
-    }
-}
-//-----------------------------------------------------------------------------
-BOOST_FIXTURE_TEST_CASE(createPatchOutputXml_test, DmOutputTestFixture)
-{
-    std::cout << "-- DmOutput:createPatchOutputXml_test" << std::endl;
-    try
-    {
-        fs::path out_fits_file_1{ "some_file_1.fits" };
-        fs::path out_fits_file_2{ "some_file_2.fits" };
-        fs::path out_fits_file_3{ "some_file_3.fits" };
-        const fs::path filename = test_path / "Patch.xml";
-        std::string product_type = "DpdTwoDMassConvergencePatch";
-        int NResamples = 2;
-
-        auto product = initProduct<dpdTwoDMassConvergencePatch,
-                                   twoDMassCollectConvergencePatch,
-                                   int>(product_type, NResamples);
-
-        dm.createNoisedPatchXml(product, out_fits_file_1);
-        dm.createDenoisedPatchXml(product, out_fits_file_2);
-        dm.createSNRPatchOutputXml(product, out_fits_file_3);
-        writeProduct<dpdTwoDMassConvergencePatch>(product, filename);
-        BOOST_CHECK(fs::is_regular_file(filename));
-    } catch (std::exception& e) {
-        BOOST_THROW_EXCEPTION(e);
-    }
-}
 //-----------------------------------------------------------------------------
 BOOST_FIXTURE_TEST_CASE(createSphereOutputXml_test, DmOutputTestFixture)
 {
@@ -452,7 +400,7 @@ BOOST_FIXTURE_TEST_CASE(createPatchtoSphereProjCenterPosXml_test, DmOutputTestFi
                                    twoDMassCollectConvergencePatchesToSphere,
                                    int>(product_type, NResamples);
 
-        dm.createPatchtoSphereProjCntrPosXml(product, fitsFile);
+        dm.createPatchtoSphereProjCPosXml(product, fitsFile);
         writeProduct<dpdTwoDMassConvergencePatchesToSphere>(product, filename);
         BOOST_CHECK(fs::is_regular_file(filename));
     } catch (std::exception& e) {
@@ -483,7 +431,7 @@ BOOST_FIXTURE_TEST_CASE(createPatchtoSphereXml_test, DmOutputTestFixture)
         dm.createDenoisedPatchtoSphereXml(product, fitsFile2);
         dm.createPatchtoSphereGalCountXml(product, fitsFile3);
         dm.createSNRPatchtoSphereOutputXml(product, fitsFile4);
-        dm.createPatchtoSphereProjCntrPosXml(product, fitsFile5);
+        dm.createPatchtoSphereProjCPosXml(product, fitsFile5);
         dm.createPatchtoSphereMCXml(product, fitsFile6);
         dm.createPatchtoSphereMCXml(product, fitsFile7);
         writeProduct<dpdTwoDMassConvergencePatchesToSphere>(product, filename);

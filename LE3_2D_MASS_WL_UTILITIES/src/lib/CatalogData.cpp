@@ -26,6 +26,8 @@
 using namespace Euclid;
 using namespace Fits;
 
+using Elements::ExitCode;
+
 static Elements::Logging logger = Elements::Logging::getLogger("CatalogData");
 
 namespace LE3_2D_MASS_WL_UTILITIES {
@@ -52,7 +54,7 @@ void CatalogData::getCatalogData(fs::path& workdir, fs::path& inputCatalog)
     {
         m_inputCatalog = datadir / inputCatalog;
     }
-    // Case 2: When input catalog file is in xml/json format:
+    // Case 2: When input catalog file is in xml format:
     // fetch catalog filename from xml file and read it (expected in workdir)
     else if (checkFileType(workdir / inputCatalog, signXML))
     {
@@ -67,9 +69,11 @@ void CatalogData::readCatalog(const fs::path& filename)
 {
     if (!checkFileType(filename, signFITS))
     {
-        return;
+        logger.fatal() << "Bad catalog file: ", filename.native();
+        throw ExitCode::NOINPUT;
     }
     MefFile f(filename.native(), FileMode::Read);
+    // access hdu indexed 0 (not using its name)
     const BintableHdu& ext = f.access<BintableHdu>(1);
     const BintableColumns& cols = ext.columns();
     m_colNamesHdu = cols.readAllNames();
@@ -138,6 +142,10 @@ void CatalogData::setColnamesToRead()
 double CatalogData::operator()(const std::string& colname, int i) const
 {
     int index = getColumnIndex(colname);
+    if(i < 0 or i > m_nEntries)
+    {
+        logger.fatal() << "Index not found: " << i;
+    }
     return m_data[index](m_sortedIndex[i]);
 }
 
@@ -225,6 +233,16 @@ void CatalogData::sortIndex(const std::string& key)
         return m_data[index](i) < m_data[index](j);
     });
 }
+
+void CatalogData::getMinMax(const std::string& key, double& min, double& max) const
+{
+    int index = getColumnIndex(key);
+
+    auto res = std::minmax_element(m_data[index].begin(), m_data[index].end());
+    min = *res.first;
+    max = *res.second;
+}
+
 
 int CatalogData::getColumnIndex(std::string colname) const
 {

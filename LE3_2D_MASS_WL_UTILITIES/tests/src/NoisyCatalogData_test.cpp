@@ -53,8 +53,7 @@ BOOST_AUTO_TEST_CASE( createNoisyData_test )
 {
     logger.info() << "-- NoisyCatalogData: createNoisyData";
 
-    NoisyCatalogData randomise;
-    CatalogData noisyCat = randomise.getNoisyCatalog(cat);
+    CatalogData noisyCat = NoisyCatalogData::getNoisyCatalog(cat);
 
     BOOST_CHECK(cat.getNentries() == noisyCat.getNentries());
     BOOST_CHECK(cat["ra"](0) == noisyCat["ra"](0));
