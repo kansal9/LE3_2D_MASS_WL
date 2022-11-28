@@ -94,7 +94,7 @@ void DmOutput::createPatchXml(
         twoDMassSNRPatch map(output, "le3.wl.2dmass.output.patchsnr");
         product->Data().SNRPatch(SNRPatch_type{ map });
         maplist_ptr = std::make_unique<DataContainer_type>(
-                product->Data().DenoisedConvergence().get().DataContainer());
+                product->Data().SNRPatch().get().DataContainer());
     }
     maplist_ptr->FileName(fits_out_filename.filename().string());
     logger.info() << "Added data container and file";

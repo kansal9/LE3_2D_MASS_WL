@@ -74,7 +74,7 @@ GenericParam::GenericParam()
 
     // code defined parameters
     m_ExtName = std::string("");
-    m_ParaFileType = std::string("");
+    m_ParaFileType = parameterType::Unknown;
 }
 
 void GenericParam::print() const
@@ -106,13 +106,19 @@ void GenericParam::print() const
     std::cout << "overlap: " << m_overlap << std::endl;
     std::cout << "MassThreshold: " << m_MassThreshold << std::endl;
     std::cout << "ExtName: " << m_ExtName << std::endl;
-    std::cout << "ParaFileType: " << m_ParaFileType << std::endl;
+    // std::cout << "ParaFileType: " << m_ParaFileType << std::endl;
 }
 
 const std::vector<PatchDef>& GenericParam::getPatches() const
 {
     return m_Patches;
 }
+
+void GenericParam::setPatches(const std::vector<PatchDef>& patches)
+{
+    m_Patches = patches;
+}
+
 
 const PatchDef& GenericParam::getPatch(int i) const
 {
@@ -269,12 +275,12 @@ void GenericParam::setOverlap(int overlap)
     m_overlap = overlap;
 }
 
-const std::string& GenericParam::getParaFileType() const
+parameterType GenericParam::getParaFileType() const
 {
     return m_ParaFileType;
 }
 
-void GenericParam::setParaFileType(const std::string& paraFileType)
+void GenericParam::setParaFileType(parameterType paraFileType)
 {
     m_ParaFileType = paraFileType;
 }
@@ -358,6 +364,16 @@ void GenericParam::setZMaxHalo(double zMaxHalo)
 double GenericParam::getZMin(int i) const
 {
     return m_ZMin[i];
+}
+
+void GenericParam::setZMin(const std::vector<double>& zmin)
+{
+    m_ZMin = zmin;
+}
+
+void GenericParam::setZMax(const std::vector<double>& zmax)
+{
+    m_ZMax = zmax;
 }
 
 }  // namespace LE3_2D_MASS_WL_UTILITIES

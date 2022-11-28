@@ -275,14 +275,16 @@ const std::vector<double> NormB3Spline =
 /**
  *@brief  possible input parameter types
  */
-const std::unordered_set<std::string> ParameterTypesAvail({
-    "DpdTwoDMassParamsConvergencePatch",
-    "DpdTwoDMassParamsConvergencePatchesToSphere",
-    "DpdTwoDMassParamsConvergenceClusters",
-    "DpdTwoDMassParamsConvergenceSphere",
-    "DpdTwoDMassParamsPeakCatalogConvergence",
-    "DpdTwoDMassParamsPeakCatalogMassAperture"
-});
+enum class parameterType
+{
+    DpdTwoDMassParamsConvergencePatch, /**< convergence patch */
+    DpdTwoDMassParamsConvergencePatchesToSphere, /**< convergence patch to sphere */
+    DpdTwoDMassParamsConvergenceClusters, /**< convergence cluster */
+    DpdTwoDMassParamsConvergenceSphere, /**< convergence sphere */
+    DpdTwoDMassParamsPeakCatalogConvergence, /**< peak catalogue */
+    DpdTwoDMassParamsPeakCatalogMassAperture, /**< peak mass-aperture catalogue */
+    Unknown /**< unknown parameter type */
+};
 
 /**
  * @enum      mapType
@@ -290,23 +292,8 @@ const std::unordered_set<std::string> ParameterTypesAvail({
  */
 enum class mapType
 {
-    shearMap,/**< shear map */
-    convMap/**< convergence map */
-};
-
-/**
- * @enum      catalogType
- * @brief     Type of maps
- */
-enum class catalogType
-{
-    KSBCatalog,/**< shearCatalog (KSBCatalog) */
-    LensMCCatalog,/**< shearCatalog (LensMCCatalog) */
-    MomentsMLCatalog,/**< shearCatalog (MomentsMLCatalog) */
-    RegaussCatalog,/**< shearCatalog (RegaussCatalog) */
-    LE2Catalog,/**< LE2Catalog (LE2Catalog for all WL PFs) */
-    clusterCatalog,/**< clusterCatalog (clusterCatalog) */
-    VisibilityMask/**< Visibility Mask (VMPZ_ID) */
+    shearMap, /**< shear map */
+    convMap /**< convergence map */
 };
 
 /**
@@ -315,23 +302,27 @@ enum class catalogType
  */
 enum class outputType
 {
-    NoisedPatch,/**< Noisy convergence patch */
-    DenoisedPatch,/**< Denoisy convergence patch */
-    SNRPatch,/**< SNR convergence patch */
-    NoisedSphere,/**< Noisy Sphere convergence */
-    DenoisedSphere,/**< Denoisy Sphere convergence */
-    SNRSphere,/**< SNR Sphere convergence */
-    MCSphere,/**< Monte Carlo convergence */
-    GalCountSphere,/**< Galaxy Count Sphere convergence */
+    // Cartesian
+    NoisedPatch, /**< noisy convergence */
+    DenoisedPatch, /**< denoised convergence */
+    SNRPatch, /**< SNR convergence */
+    // Cartesian patch to sphere
+    NoisedPatchesSphere, /**< noisy convergence */
+    DenoisedPatchesSphere, /**< denoised convergence */
+    SNRPatchesSphere, /**< SNR convergence */
+    GalCountPatchesSphere, /**< galaxy density */
+    MCPatchesSphere, /**< monte carlo convergence */
+    ProjCenterPos, /**< centers position */
+    // Spherical
+    NoisedSphere, /**< noisy convergence */
+    DenoisedSphere, /**< denoised convergence */
+    SNRSphere, /**< SNR convergence */
+    MCSphere, /**< monte carlo convergence */
+    GalCountSphere, /**< galaxy density */
+    // Clusters
     ClusterCatalog, /**< convergence maps (tar of single clusters) for all clusters */
-    SingleClusterCatalog,/**< convergence patch based on single cluster*/
-    PeakCatalog,/**< Peak count catalog */
-    NoisedPatchesSphere,/**< Noisy Patches to Sphere convergence */
-    ProjCenterPos,/**< Centers position for patches to sphere convergence */
-    DenoisedPatchesSphere,/**< Denoisy Patches to Sphere convergence */
-    SNRPatchesSphere,/**< SNR Patches to Sphere convergence */
-    GalCountPatchesSphere,/**< Galaxy Count for Patches Sphere convergence */
-    MCPatchesSphere/**< Monte Carlo convergence patches */
+    SingleClusterCatalog, /**< convergence patch based on single cluster */
+    PeakCatalog /**< peak count catalog */
 };
 
 /**
@@ -411,6 +402,13 @@ void fillVecColumnLinspace(VecColumn<double>& col,
  * @param    <filepath> path to the xml filename
  */
 std::string getXmlProductType(const fs::path& filepath);
+
+/**
+ * @brief    get the parameter type from an xml file
+ * @param    <filepath> path to the xml filename
+ */
+parameterType getParameterType(const fs::path& filepath);
+
 
 }  // namespace LE3_2D_MASS_WL_UTILITIES
 

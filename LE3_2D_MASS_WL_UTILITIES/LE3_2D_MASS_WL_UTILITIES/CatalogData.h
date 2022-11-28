@@ -116,7 +116,8 @@ public:
      */
     void fillTest(int N, const std::string& shearType="LENSMC",
                   double raMin=0, double raMax=360,
-                  double decMin=0., double decMax=180);
+                  double decMin=0., double decMax=180,
+                  double zMin=0, double zMax=9);
 
     /**
      * @brief    get number of entries in the catalog

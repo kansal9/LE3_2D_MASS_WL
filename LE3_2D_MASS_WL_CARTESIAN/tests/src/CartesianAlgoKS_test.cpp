@@ -86,79 +86,64 @@ BOOST_AUTO_TEST_CASE( overallCartesianAlgo_test )
     fs::create_directories(datadir);
 
     CartesianParam params;
-    // Case 1: check file is of XML format
-    if (checkFileType(testParamFile, signXML))
-    {
-        // read XML, get parameter file type
-        // check if it's to get a patch
-        if (fileHasField(testParamFile, "DpdTwoDMassParamsConvergencePatch"))
-        {
-            params.readConvPatchXMLFile(testParamFile.native(), cat);
-        }
-    }
+    params.readConvPatchXMLFile(testParamFile.native(), cat);
 
     CartesianAlgoKS CartesainAlgo(params);
-    for (size_t it = 0; it < params.getNPatches(); it++)
+
+    const PatchDef& patch = params.getPatches()[0];
+    double ramin = patch.getRaMin();
+    double decmin = patch.getDecMin();
+    double ramax = patch.getRaMax();
+    double decmax = patch.getDecMax();
+
+    std::cout << "ramin: " << ramin * rad2deg << std::endl;
+    std::cout << "decmin: " << decmin * rad2deg << std::endl;
+    std::cout << "ramax: " << ramax * rad2deg << std::endl;
+    std::cout << "decmax: " << decmax * rad2deg << std::endl;
+
+    std::cout << "ExtractShearMap_test" << std::endl;
+    fs::path shearMapPath = "ExtractedShearMap.fits";
+    CartesainAlgo.extractShearMap(datadir / shearMapPath, cat, patch);
+
+    BOOST_CHECK(fs::exists((datadir / shearMapPath).native()));
+
+    ShearMap inputShearMap(datadir / shearMapPath);
+    ShearMap outputShearMap(inputShearMap, false);
+    ConvergenceMap convergenceMap(inputShearMap, false);
+
+    // copy ngal to output maps
+    convergenceMap.singleAxisCopy(inputShearMap, 2);
+    outputShearMap.singleAxisCopy(inputShearMap, 2);
+
+    std::cout << "PerformKSMassMapping_test" << std::endl;
+    CartesainAlgo.performMassMapping(inputShearMap, convergenceMap);
+
+    std::cout << "PerformInverseKSMassMapping_test" << std::endl;
+    CartesainAlgo.performInverseKSMassMapping(convergenceMap,
+            outputShearMap);
+
+    for (size_t i = 0; i < inputShearMap.getXdim(); i++)
     {
-        std::cout << "Patch number: " << it << std::endl;
-
-        const PatchDef& patch = params.getPatches()[it];
-        double ramin = patch.getRaMin();
-        double decmin = patch.getDecMin();
-        double ramax = patch.getRaMax();
-        double decmax = patch.getDecMax();
-        // PatchDef CB(ramin, ramax, decmin, decmax, zMin, zMax);
-
-        std::cout << "ramin: " << ramin * rad2deg << std::endl;
-        std::cout << "decmin: " << decmin * rad2deg << std::endl;
-        std::cout << "ramax: " << ramax * rad2deg << std::endl;
-        std::cout << "decmax: " << decmax * rad2deg << std::endl;
-
-
-        std::cout << "ExtractShearMap_test" << std::endl;
-        fs::path shearMapPath = "ExtractedShearMap.fits";
-        CartesainAlgo.extractShearMap(datadir / shearMapPath, cat, patch);
-
-        BOOST_CHECK(fs::exists((datadir / shearMapPath).native()));
-
-        ShearMap inputShearMap(datadir / shearMapPath);
-        ShearMap outputShearMap(inputShearMap, false);
-        ConvergenceMap convergenceMap(inputShearMap, false);
-
-        // copy ngal to output maps
-        convergenceMap.singleAxisCopy(inputShearMap, 2);
-        outputShearMap.singleAxisCopy(inputShearMap, 2);
-
-        std::cout << "PerformKSMassMapping_test" << std::endl;
-        CartesainAlgo.performMassMapping(inputShearMap, convergenceMap);
-
-        std::cout << "PerformInverseKSMassMapping_test" << std::endl;
-        CartesainAlgo.performInverseKSMassMapping(convergenceMap,
-                outputShearMap);
-
-        for (size_t i = 0; i < inputShearMap.getXdim(); i++)
+        for (size_t j = 0; j < inputShearMap.getYdim(); j++)
         {
-            for (size_t j = 0; j < inputShearMap.getYdim(); j++)
-            {
-                // check number of galaxies
-                BOOST_CHECK(
-                        inputShearMap.getBinValue(i, j, 2)
-                                == outputShearMap.getBinValue(i, j, 2));
+            // check number of galaxies
+            BOOST_CHECK(
+                    inputShearMap.getBinValue(i, j, 2)
+                            == outputShearMap.getBinValue(i, j, 2));
 
-                // check gamma1 and gamma2
-                if (inputShearMap.getBinValue(i, j, 2) > 0)
-                {
-                    BOOST_CHECK(
-                            fabs(
-                                    inputShearMap.getBinValue(i, j, 0)
-                                            - outputShearMap.getBinValue(i, j,
-                                                    0)) < 1e-6);
-                    BOOST_CHECK(
-                            fabs(
-                                    inputShearMap.getBinValue(i, j, 1)
-                                            - outputShearMap.getBinValue(i, j,
-                                                    1)) < 1e-6);
-                }
+            // check gamma1 and gamma2
+            if (inputShearMap.getBinValue(i, j, 2) > 0)
+            {
+                BOOST_CHECK(
+                        fabs(
+                                inputShearMap.getBinValue(i, j, 0)
+                                        - outputShearMap.getBinValue(i, j,
+                                                0)) < 1e-6);
+                BOOST_CHECK(
+                        fabs(
+                                inputShearMap.getBinValue(i, j, 1)
+                                        - outputShearMap.getBinValue(i, j,
+                                                1)) < 1e-6);
             }
         }
     }

@@ -259,13 +259,13 @@ public:
      * @brief get getParaFileType
      * @return getParaFileType
      */
-    const std::string& getParaFileType() const;
+    parameterType getParaFileType() const;
 
     /**
      * @brief set getParaFileType
      * @param paraFileType
      */
-    void setParaFileType(const std::string& paraFileType);
+    void setParaFileType(parameterType paraFileType);
 
     /**
      * @brief get project
@@ -364,10 +364,28 @@ public:
     double getZMin(int i) const;
 
     /**
+     * @brief set zMin
+     * @param zmin
+     */
+    void setZMin(const std::vector<double>& zmin);
+
+    /**
+     * @brief set zMax
+     * @param zmax
+     */
+    void setZMax(const std::vector<double>& zmax);
+
+    /**
      * @brief get Patches
      * @return Patches
      */
     const std::vector<PatchDef>& getPatches() const;
+
+    /**
+     * @brief set Patches
+     * @param patches
+     */
+    void setPatches(const std::vector<PatchDef>& patches);
 
     /**
      * @brief get Patch
@@ -519,7 +537,7 @@ protected:
     /**
      * parameter file type
      */
-    std::string m_ParaFileType;
+    parameterType m_ParaFileType;
 
 };  // End of GenericParam class
 

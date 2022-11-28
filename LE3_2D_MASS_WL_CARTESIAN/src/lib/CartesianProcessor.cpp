@@ -36,15 +36,14 @@ namespace LE3_2D_MASS_WL_CARTESIAN {
 
 static Logging logger = Logging::getLogger("CartesianProcessor");
 
-CartesianProcessor::CartesianProcessor() : m_args(),
-                m_shearCatalogPath(), m_shearMapPath(), m_clusterCatalog(),
-                m_produceMcMaps(false)
+CartesianProcessor::CartesianProcessor() : m_args(), m_shearCatalogPath(),
+        m_shearMapPath(), m_clusterCatalogPath(), m_produceMcMaps(false)
 {
 }
 
 CartesianProcessor::CartesianProcessor(
         std::map<std::string, variable_value>& args) : m_args(args),
-                m_shearCatalogPath(), m_shearMapPath(), m_clusterCatalog(),
+                m_shearCatalogPath(), m_shearMapPath(), m_clusterCatalogPath(),
                 m_produceMcMaps(false)
 {
     parseOptions();
@@ -64,26 +63,27 @@ void CartesianProcessor::parseOptions()
     m_workdir = m_args["workdir"].as<std::string>();
     m_datadir = m_workdir / "data";
     m_paramfile = m_args["paramfile"].as<std::string>();
-    m_paramtype = getXmlProductType(m_paramfile);
+    parameterType paramtype = getParameterType(m_paramfile);
 
     // if parameter product type not in available ones, throw an error
-    if(ParameterTypesAvail.count(m_paramtype) == 0)
+    if(paramtype == parameterType::Unknown)
     {
         logger.fatal("Bad parameter type!");
         throw ExitCode::USAGE;
     }
 
-    logger.info("Parameter type: " + m_paramtype);
-
-    if(m_paramtype == "DpdTwoDMassParamsConvergencePatch")
+    // read parameters and catalogue datas
+    if(paramtype == parameterType::DpdTwoDMassParamsConvergencePatch)
     {
         // Case: small patches defined in parameters, need a shear catalog.
         // May process multiple patches in multiple redshift bins.
         // aka. Patch-Based E/B Convergence Maps Parameters
         checkOption("shear");
         m_shearCatalogPath = m_args["shear"].as<std::string>();
+        m_shear_cat.getCatalogData(m_workdir, m_shearCatalogPath);
+        m_params.readConvPatchXMLFile(m_paramfile, m_shear_cat);
     }
-    else if(m_paramtype == "DpdTwoDMassParamsConvergenceClusters")
+    else if(paramtype == parameterType::DpdTwoDMassParamsConvergenceClusters)
     {
         // Case: small patches defined in cluster catalog, need a shear catalog
         // and a cluster catalog. Will process multiple patches in a single
@@ -92,9 +92,11 @@ void CartesianProcessor::parseOptions()
         checkOption("shear");
         checkOption("clusterCatalog");
         m_shearCatalogPath = m_args["shear"].as<std::string>();
-        m_clusterCatalog = m_args["clusterCatalog"].as<std::string>();
+        m_clusterCatalogPath = m_args["clusterCatalog"].as<std::string>();
+        m_params.readConvClustersXMLFile(m_paramfile, m_cluster_cat);
+        // TODO: read cluster catalog data
     }
-    else if(m_paramtype == "DpdTwoDMassParamsConvergencePatchesToSphere")
+    else if(paramtype == parameterType::DpdTwoDMassParamsConvergencePatchesToSphere)
     {
         // Case: multiple patches covering the sphere, need a shear catalog.
         // Will process multiple patches in multiple redshift bins (TBC, maybe
@@ -102,18 +104,20 @@ void CartesianProcessor::parseOptions()
         // aka. MultiPatch-Based E/B Convergence Maps Parameters
         checkOption("shear");
         m_shearCatalogPath = m_args["shear"].as<std::string>();
+        m_shear_cat.getCatalogData(m_workdir, m_shearCatalogPath);
+        m_params.readConvPatchesToSphereXMLFile(m_paramfile, m_shear_cat);
     }
-    else if(m_paramtype == "DpdTwoDMassParamsPeakCatalogConvergence")
+    else if(paramtype == parameterType::DpdTwoDMassParamsPeakCatalogConvergence)
     {
         // Case: TODO
         // aka. Wavelet-based Peak Catalog Parameters
     }
-    else if(m_paramtype == "DpdTwoDMassParamsPeakCatalogMassAperture")
+    else if(paramtype == parameterType::DpdTwoDMassParamsPeakCatalogMassAperture)
     {
         // Case: TODO
         // aka. Peak Catalog Based on Aperture Mass Parameters
     }
-    else if(m_paramtype == "DpdTwoDMassParamsConvergenceSphere")
+    else if(paramtype == parameterType::DpdTwoDMassParamsConvergenceSphere)
     {
         // Case: TODO
         // aka. Spherical E/B Convergence Maps Parameters
@@ -159,18 +163,23 @@ void CartesianProcessor::processPatch(CartesianAlgoKS& cartesianAlgoKS, CatalogD
 
     // Create a DMOutput object
     DmOutput dm;
-    const std::string product_type = "DpdTwoDMassConvergencePatch";
-    auto product = initProduct<dpdTwoDMassConvergencePatch,
-                               twoDMassCollectConvergencePatch,
-                               int>(product_type, params.getNResamples());
 
-    dm.createPatchXml(product, outputType::NoisedPatch, params.m_currOutFilesPath["ConvergenceNoisy"]);
-    dm.createPatchXml(product, outputType::DenoisedPatch, params.m_currOutFilesPath["ConvergenceDenoised"]);
-    dm.createPatchXml(product, outputType::SNRPatch, params.m_currOutFilesPath["SNR"]);
+    if(m_params.getParaFileType() == parameterType::DpdTwoDMassParamsConvergencePatch)
+    {
+        const std::string product_type = "DpdTwoDMassConvergencePatch";
+        auto product = initProduct<dpdTwoDMassConvergencePatch,
+                                   twoDMassCollectConvergencePatch,
+                                   int>(product_type, params.getNResamples());
 
-    auto outfile = m_workdir / fs::path(filename_provider.getFilename(
-            "DpdTwoDMassConvergencePatch_" + std::to_string(ip), ".xml", true));
-    writeProduct<dpdTwoDMassConvergencePatch>(product, outfile);
+        dm.createPatchXml(product, outputType::NoisedPatch, params.m_currOutFilesPath["ConvergenceNoisy"]);
+        dm.createPatchXml(product, outputType::DenoisedPatch, params.m_currOutFilesPath["ConvergenceDenoised"]);
+        dm.createPatchXml(product, outputType::SNRPatch, params.m_currOutFilesPath["SNR"]);
+
+        auto outfile = m_workdir / fs::path(filename_provider.getFilename(
+                "DpdTwoDMassConvergencePatch_" + std::to_string(ip), ".xml", true));
+        writeProduct<dpdTwoDMassConvergencePatch>(product, outfile);
+    }
+
 }
 
 void CartesianProcessor::processZbin(CartesianAlgoKS& cartesianAlgoKS, CatalogData& cat)
@@ -249,41 +258,27 @@ void CartesianProcessor::processZbin(CartesianAlgoKS& cartesianAlgoKS, CatalogDa
     } // end loop over Nresamples
 
     // Save SNR map
-    params.setExtName("SNR_ZBIN_" + std::to_string(iz));
-    snrMap.writeMap(params.m_currOutFilesPath["SNR"], params);
+    if(m_params.getParaFileType() == parameterType::DpdTwoDMassParamsConvergencePatch)
+    {
+        params.setExtName("SNR_ZBIN_" + std::to_string(iz));
+        snrMap.writeMap(params.m_currOutFilesPath["SNR"], params);
+    }
 
     logger.info() << "------------------------------------------------";
 }
 
 void CartesianProcessor::process()
 {
-    CartesianParam params;
-    CatalogData cat, clusterCat;
-
-    // Load shear catalog (should always exist)
-    cat.getCatalogData(m_workdir, m_shearCatalogPath);
-    logger.info() << "Number of galaxies in catalog: " << cat.getNentries();
-
-    // Load cluster catalog if exists
-    if(not m_clusterCatalog.empty())
-    {
-        clusterCat.getCatalogData(m_workdir, m_clusterCatalog);
-        logger.info() << "Number of clusters in catalog: " << clusterCat.getNentries();
-    }
-
-    // Read parameters (and patches definitions)
-    readParameterFile(m_paramfile, params, cat, clusterCat);
-
     // Build cartesian algo
-    CartesianAlgoKS cartesianAlgoKS(params);
+    CartesianAlgoKS cartesianAlgoKS(m_params);
 
     // Iterate over patches
-    int Npatches = params.getNPatches();
+    int Npatches = m_params.getNPatches();
     logger.info() << "Start iteration over NPatches = " << Npatches;
     for(int ip=0; ip<Npatches; ip++)
     {
-        params.m_currIpatch = ip;
-        processPatch(cartesianAlgoKS, cat);
+        m_params.m_currIpatch = ip;
+        processPatch(cartesianAlgoKS, m_shear_cat);
     }
 }
 

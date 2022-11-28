@@ -28,12 +28,14 @@
 #include "ElementsServices/DataSync.h"
 
 #include "LE3_2D_MASS_WL_CARTESIAN/CartesianParam.h"
+#include "LE3_2D_MASS_WL_UTILITIES/Utils.h"
 
 #include <ios>
 #include <sstream>
 #include <iostream>
 
 using namespace LE3_2D_MASS_WL_CARTESIAN;
+using namespace LE3_2D_MASS_WL_UTILITIES;
 using namespace ElementsServices::DataSync;
 
 namespace fs = boost::filesystem;
@@ -72,7 +74,7 @@ BOOST_FIXTURE_TEST_CASE (convergencePatchxmlFile_test, CartesianParamDataSyncFix
     carParam.readConvPatchXMLFile(xmlFileName.native(), cat);
     BOOST_CHECK_EQUAL(carParam.getPatches()[0].getPatchWidth(), 10.*M_PI/180.);
     BOOST_CHECK_EQUAL(carParam.getProject(), "TAN");
-    BOOST_CHECK_EQUAL(carParam.getParaFileType(), "Conv_Patch");
+    BOOST_CHECK(carParam.getParaFileType() == parameterType::DpdTwoDMassParamsConvergencePatch);
     BOOST_CHECK_EQUAL(carParam.getNbins(), 2);
 }
 //-----------------------------------------------------------------------------

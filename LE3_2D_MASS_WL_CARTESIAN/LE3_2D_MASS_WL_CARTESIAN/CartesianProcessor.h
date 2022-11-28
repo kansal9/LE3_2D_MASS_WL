@@ -106,18 +106,30 @@ public:
      */
     void processZbin(CartesianAlgoKS& cartesianAlgoKS, CatalogData& cat);
 
+    /**
+     * @brief Operation parameters
+     */
+    CartesianParam m_params;
+
+    /**
+     * @brief Shear catalog
+     */
+    CatalogData m_shear_cat;
+
+    /**
+     * @brief Cluster catalog
+     */
+    CatalogData m_cluster_cat;
 
 private:
     std::map<std::string, variable_value> m_args;
     path m_workdir;
     path m_datadir;
     path m_paramfile;
-    std::string m_paramtype;
     path m_shearCatalogPath;
     path m_shearMapPath;
-    path m_clusterCatalog;
+    path m_clusterCatalogPath;
     bool m_produceMcMaps;
-
 };
 // End of CartesianProcessor class
 

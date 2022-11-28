@@ -177,14 +177,16 @@ void CartesianAlgoKS::performReducedShear(const ShearMap& inShearMap,
     }
 
     // save the noisy convergence map before denoising (backup original gaussStd)
-    double gaussStd = m_cartesianParam.getGaussStd();
-    m_cartesianParam.setGaussStd(0);
-    logger.info() << "Saving noisy convergence map";
-    m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
-    outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceNoisy"], m_cartesianParam);
-
-    // restore gaussStd value
-    m_cartesianParam.setGaussStd(gaussStd);
+    if(m_cartesianParam.getParaFileType() == parameterType::DpdTwoDMassParamsConvergencePatch)
+    {
+        double gaussStd = m_cartesianParam.getGaussStd();
+        m_cartesianParam.setGaussStd(0);
+        logger.info() << "Saving noisy convergence map";
+        m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
+        outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceNoisy"], m_cartesianParam);
+        // restore gaussStd value
+        m_cartesianParam.setGaussStd(gaussStd);
+    }
 
     // if filter is activated, filter and write denoised convergence map
     if (fabs(m_cartesianParam.getGaussStd()) > 0.001)
@@ -193,9 +195,12 @@ void CartesianAlgoKS::performReducedShear(const ShearMap& inShearMap,
         outConvergenceMap.setKappaBToZero();
 
         // save the denoised convergence map
-        logger.info() << "saving denoised convergence map";
-        m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
-        outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceDenoised"], m_cartesianParam);
+        if(m_cartesianParam.getParaFileType() == parameterType::DpdTwoDMassParamsConvergencePatch)
+        {
+            logger.info() << "saving denoised convergence map";
+            m_cartesianParam.setExtName("KAPPA_ZBIN_" + std::to_string(m_cartesianParam.m_currIzbin));
+            outConvergenceMap.writeMap(m_cartesianParam.m_currOutFilesPath["ConvergenceDenoised"], m_cartesianParam);
+        }
     }
 
     logger.info() << "end of performReducedShear";

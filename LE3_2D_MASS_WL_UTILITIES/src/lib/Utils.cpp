@@ -325,4 +325,22 @@ std::string getXmlProductType(const fs::path& filepath)
     return product_type;
 }
 
+parameterType getParameterType(const fs::path& filepath)
+{
+    std::string product_type = getXmlProductType(filepath);
+    if(product_type == "DpdTwoDMassParamsConvergencePatch")
+    {
+        return parameterType::DpdTwoDMassParamsConvergencePatch;
+    }
+    else if(product_type == "DpdTwoDMassParamsConvergencePatchesToSphere")
+    {
+        return parameterType::DpdTwoDMassParamsConvergencePatchesToSphere;
+    }
+    else
+    {
+        return parameterType::Unknown;
+    }
+}
+
+
 } // LE3_2D_MASS_WL_UTILITIES

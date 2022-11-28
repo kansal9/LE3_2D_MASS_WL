@@ -95,7 +95,7 @@ void CartesianParam::readConvPatchXMLFile(const fs::path& filepath,
         readBaseParams<twoDMassParamsConvergencePatch>(data_xml);
 
         setExtName(std::string("KAPPA_PATCHES"));
-        setParaFileType(std::string("Conv_Patch"));
+        setParaFileType(parameterType::DpdTwoDMassParamsConvergencePatch);
         setAddBorder(data_xml.GapsParams().AddBorder());
 
         // redshift parameters: fill zmin and zmax vectors
@@ -143,7 +143,7 @@ void CartesianParam::readConvClustersXMLFile(const fs::path& filepath,
         readBaseParams<twoDMassParamsConvergenceClusters>(data_xml);
 
         setExtName(std::string("KAPPA_PATCHES"));
-        setParaFileType(std::string("Conv_Cluster"));
+        setParaFileType(parameterType::DpdTwoDMassParamsConvergenceClusters);
         setAddBorder(data_xml.GapsParams().AddBorder());
 
         setMassThreshold(data_xml.MassThreshold());
@@ -190,7 +190,7 @@ void CartesianParam::readConvPatchesToSphereXMLFile(
         readBaseParams<twoDMassParamsConvergencePatchesToSphere>(data_xml);
 
         setExtName(std::string("KAPPA_PATCHES"));
-        setParaFileType(std::string("Conv_PatchesToSphere"));
+        setParaFileType(parameterType::DpdTwoDMassParamsConvergencePatchesToSphere);
         setAddBorder(data_xml.GapsParams().AddBorder());
 
         // redshift parameters: fill zmin and zmax vectors

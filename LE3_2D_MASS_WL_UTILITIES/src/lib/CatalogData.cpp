@@ -62,7 +62,9 @@ void CatalogData::getCatalogData(fs::path& workdir, fs::path& inputCatalog)
         m_inputCatalog = datadir / m_inp.getCatalogFilename();
     }
     readCatalog(m_inputCatalog);
-    logger.info() << "Done reading catalog: " << m_inputCatalog;
+    logger.info() << "Done reading catalog: " << m_inputCatalog
+                  << " (nEntries=" << getNentries() << ")";
+
 }
 
 void CatalogData::readCatalog(const fs::path& filename)
@@ -163,11 +165,13 @@ VecColumn<double>& CatalogData::operator[](const std::string& colname)
 
 void CatalogData::fillTest(int N, const std::string& shearType,
                            double raMin, double raMax,
-                           double decMin, double decMax)
+                           double decMin, double decMax,
+                           double zMin, double zMax)
 {
     logger.info() << "Fill for test purpose with patch bounds: "
                   << raMin << " " << raMax << " "
-                  << decMin << " " << decMax;
+                  << decMin << " " << decMax << " "
+                  << zMin << " " << zMax;
 
     m_colNames = getShearColNamesAndProxy(shearType);
     m_nEntries = N;
@@ -183,7 +187,7 @@ void CatalogData::fillTest(int N, const std::string& shearType,
     fillVecColumnLinspace((*this)["w"], N, 1, 1);
     fillVecColumnLinspace((*this)["g1"], N, 0, 0.4);
     fillVecColumnLinspace((*this)["g2"], N, 0, 0.1);
-    fillVecColumnLinspace((*this)["z"], N, 0, 9);
+    fillVecColumnLinspace((*this)["z"], N, zMin, zMax);
     fillVecColumnLinspace((*this)["z_corr"], N, 0, 0);
     m_sortedIndex = std::vector<int>(m_nEntries);
     std::iota(m_sortedIndex.begin(), m_sortedIndex.end(), 0);
