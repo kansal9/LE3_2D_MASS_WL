@@ -24,7 +24,11 @@
 * Validation of Shear peak catalogue
 
 ### Dependency changes
-
+* Update to Elements 6.0.1
+* Update to DataModel 9.0.3
+* Update to DataModelBindings 9.0.3
+* Update to DataModelTools 9.0.3
+* Updated to EL_FitsIO 5.0
 
 
 ## 2.5.0
